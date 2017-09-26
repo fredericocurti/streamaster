@@ -7,6 +7,6 @@
 <title>Exemplo de Spring MVC</title>
 </head>
 <body>
-	 Exemplo de Spring MVC 
+	 Exemplo de Spring MVC oi Sa 
 </body>
 </html>
