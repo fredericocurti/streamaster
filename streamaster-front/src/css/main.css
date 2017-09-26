@@ -1,0 +1,28 @@
+.user-info {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+.user-avatar {
+
+}
+
+.user-email {
+    margin: 5px 5px 0 0 !important;
+}
+
+.search-bar{
+    display: block !important;
+    width: 100%;
+    margin: 0 auto;
+    background-color: white !important;
+    min-width: 300px;
+    border-radius: 1%;
+}
+
+.search-wrapper{
+    display: flex;
+    justify-content: center;
+
+}
