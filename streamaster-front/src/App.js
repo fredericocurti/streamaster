@@ -193,8 +193,10 @@ class App extends Component {
       return(
         <div className="App">
         <div className="App-header">
+
           <h4> Streamaster</h4>
           <p> A busca mais maneira da net </p>
+
         </div>
           <Card className='container' style={{ marginTop: 50, maxWidth : 600, minHeight : 250, paddingTop: 25, paddingBottom: 20 }}>
             {dialogContent()}
