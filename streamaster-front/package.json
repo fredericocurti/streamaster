@@ -3,14 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "cookie-parser": "^1.4.3",
+    "express": "^4.15.5",
     "lodash": "^4.17.4",
     "material-ui": "^0.19.2",
     "moment": "^2.18.1",
+    "query-string": "^5.0.0",
+    "querystring": "^0.2.0",
     "react": "^15.6.1",
+    "react-addons-css-transition-group": "^15.6.2",
     "react-dom": "^15.6.1",
     "react-rangeslider": "^2.2.0",
     "react-router": "^4.2.0",
-    "react-scripts": "1.0.13"
+    "react-router-dom": "^4.2.2",
+    "react-scripts": "1.0.13",
+    "request": "^2.82.0"
   },
   "scripts": {
     "start": "react-scripts start",
