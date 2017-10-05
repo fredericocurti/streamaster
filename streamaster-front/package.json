@@ -5,6 +5,7 @@
   "dependencies": {
     "cookie-parser": "^1.4.3",
     "express": "^4.15.5",
+    "googleapis": "^22.2.0",
     "lodash": "^4.17.4",
     "material-ui": "^0.19.2",
     "moment": "^2.18.1",
