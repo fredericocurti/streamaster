@@ -21,4 +21,7 @@ class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 	<bean id="multipartResolver"
  		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
 	</bean>
+	<mvc:interceptors>
+		<bean class="mvc.controller.AutorizadorInterceptor" />
+	</mvc:interceptors>
 </beans>
