@@ -6,7 +6,6 @@ import './css/style.css'
 import store from './helpers/store'
 import auth from './helpers/auth'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
-
 import _ from 'lodash'
 
 import Main from './components/Main.jsx'

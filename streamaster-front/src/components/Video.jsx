@@ -8,7 +8,6 @@ class Video extends Component {
     }
 
     componentWillMount(){
-        console.log(this.props)
     }
 
     getInfo = () => {
@@ -19,13 +18,20 @@ class Video extends Component {
         return { artist : artist , song : song }
     }
 
+    onClick = () => {
+        this.props.onClick(this.props.info)
+        // console.log(this.props.info.id.videoId)
+    }
+
     render() {
         const info = this.getInfo()
         return (
-            <span className='col s12 track z-depth-1'>
+            <span onClick={this.onClick} className='col s12 track z-depth-1'>
                 <img src={this.props.info.snippet.thumbnails.default.url} 
-                    width={50} 
-                    style={{verticalAlign : 'middle'}} 
+                    style={{
+                        verticalAlign : 'middle', width : 'auto',
+                         height : 50, maxWidth: 50
+                    }} 
                     alt="" 
                 />
                 <span> <b>{info.artist}</b> - {info.song} </span>

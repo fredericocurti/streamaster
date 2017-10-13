@@ -243,3 +243,19 @@ input {
 .note-content{
   padding-bottom:5px;
 }
+
+.react-draggable{
+  max-width: 210px;
+  position: fixed; 
+}
+
+.handle{
+  cursor: move;
+  height: 50px;
+}
+
+.player-wrapper{
+  position: fixed;
+  width: 100%;
+  bottom : 0px;
+}

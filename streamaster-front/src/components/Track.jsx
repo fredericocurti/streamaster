@@ -20,9 +20,14 @@ class Track extends Component {
         return names
     }
 
+    onClick = () => {
+        this.props.onClick(this.props.track)
+        // console.log(this.props.track.uri)
+    }
+
     render() {
         return (
-            <span className='col s12 track z-depth-1'>
+            <span className='col s12 track z-depth-1' onClick={this.onClick}>
                 <img src={this.props.track.album.images[2].url} 
                     width={50} 
                     style={{verticalAlign : 'middle'}} 

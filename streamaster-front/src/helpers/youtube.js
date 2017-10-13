@@ -1,10 +1,3 @@
-import gapi from './gapi'
-
-
-var GoogleAuth = gapi.auth
-var isAuthorized
-var currentApiRequest
-
 var credentials = {
   apiKey : '301542026521-3bvujkuau6s3piv1fs5bgfh5ttgn7qic.apps.googleusercontent.com',
   clientId : '1S3SyhIo3228qjpsTl14tElf',
@@ -57,29 +50,29 @@ export default window.youtube = {
 //         fetch('https://accounts.google.com/o/oauth2/v2/auth?' + params , request )
 //     },
 
-    sendAuthorizedApiRequest : function(requestDetails) {
-        let currentApiRequest = requestDetails;
-        if (isAuthorized) {
-            // Make API request
-            // gapi.client.request(requestDetails)
+    // sendAuthorizedApiRequest : function(requestDetails) {
+    //     let currentApiRequest = requestDetails;
+    //     if (isAuthorized) {
+    //         // Make API request
+    //         // gapi.client.request(requestDetails)
 
-            // Reset currentApiRequest variable.
-            currentApiRequest = {};
-        } else {
-            GoogleAuth.signIn()
-        }
-    },
+    //         // Reset currentApiRequest variable.
+    //         currentApiRequest = {};
+    //     } else {
+    //         GoogleAuth.signIn()
+    //     }
+    // },
 
-    updateSigninStatus : function(isSignedIn){
-        if (isSignedIn) {
-            let isAuthorized = true;
-            if (currentApiRequest) {
-                this.sendAuthorizedApiRequest(currentApiRequest);
-            }
-        } else {
-            let isAuthorized = false;
-        }
-    },
+    // updateSigninStatus : function(isSignedIn){
+    //     if (isSignedIn) {
+    //         let isAuthorized = true;
+    //         if (currentApiRequest) {
+    //             this.sendAuthorizedApiRequest(currentApiRequest);
+    //         }
+    //     } else {
+    //         let isAuthorized = false;
+    //     }
+    // },
 
     searchVideos : function(query,callback){
         let params = new URLSearchParams(Object.entries({

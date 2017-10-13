@@ -28,10 +28,12 @@ export default window.spotify = {
   },
 
   requestToken : function(callback){
-    const params = { 
+    const params = {
+            scope         : 'user-modify-playback-state',
             client_id     : spotifyConfig.client_id,
             response_type : 'token',
-            redirect_uri  : spotifyConfig.redirect_uri
+            redirect_uri  : spotifyConfig.redirect_uri,
+            show_dialog   : true
     }
 
     const urlParams = new URLSearchParams(Object.entries(params))
@@ -79,5 +81,11 @@ export default window.spotify = {
       // Request another token if there's none on localStorage
       this.requestToken(callback)
     }
+  },
+
+  getToken : function(){
+    return spotifyConfig.token
   }
+
+  
 }
