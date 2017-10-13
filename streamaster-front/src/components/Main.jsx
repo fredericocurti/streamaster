@@ -14,7 +14,6 @@ import Player from './Player'
 
 import spotify from '../helpers/spotify.js'
 import youtube from '../helpers/youtube.js'
-import player from '../helpers/player.js'
 
 import spotifyLogo from '../assets/spotify-logo.png'
 
@@ -27,8 +26,9 @@ class Main extends Component {
             spotifyResults : [],
             youtubeResults : [],
             currentSource : '',
-            currentVideo : null,
-            spotifyUri : '',
+            currentVideo : null, 
+            currentTrack : null,
+            youtubePlayer : null
         }
     }
 
@@ -36,8 +36,11 @@ class Main extends Component {
         spotify.authenticate((status) => {
             console.log('Auth status : ' + status)
         })
+    }
 
-        
+    componentDidMount(){
+        console.log(this.youtubePlayer)
+        this.setState({ youtubePlayer : this.youtubePlayer })
     }
 
     onSearchSubmit = () => {
@@ -54,8 +57,6 @@ class Main extends Component {
             })
             this.setState({lastSearch : this.state.search})
         }
-
-        
     }
 
     onYoutubeClick = (video) => {
@@ -64,9 +65,18 @@ class Main extends Component {
 
     onSpotifyClick = (track) => {
         this.setState({currentTrack : track , currentSource : 'spotify'})
-        player.play(track)
     }
  
+    onYouTubeStateChange = (event) => {
+        console.log(event.target)
+    }
+
+    onYouTubeReady = (event) => {
+        // O objeto this.state.youtubePlayer só irá existir
+        console.log('youtube ready')
+        this.setState({youtubePlayer : event.target})
+    }
+
     render() {
         const opts = {
             height: '210',
@@ -84,6 +94,7 @@ class Main extends Component {
             }
         }
 
+
         return (
             <div>
                 { this.state.currentSource === 'youtube'
@@ -100,6 +111,9 @@ class Main extends Component {
                             <YouTube 
                                 videoId={getVideoId()}
                                 opts={opts}
+                                onStateChange={this.onYouTubeStateChange}
+                                ref={(YouTube) => { this.youtubePlayer = YouTube }}
+                                onReady={this.onYouTubeReady}
                             />                            
                         </Card>
                     </Draggable>
@@ -129,9 +143,8 @@ class Main extends Component {
                         <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700}>
                             <img src={spotifyLogo} width={200}/>
                             { this.state.spotifyResults.map((track) => <Track key={track.id} track={track} onClick={this.onSpotifyClick} /> )}
-                            
-                            <div className='divider'/>
 
+                            <div className='divider'/>
                             <img src='https://www.youtube.com/yt/about/media/images/brand-resources/logos/YouTube-logo-full_color_light.svg'
                                 width={200}
                                 style={{margin:15}}
@@ -141,6 +154,7 @@ class Main extends Component {
                     </div>
                 :   null    
                 }
+
                 { this.state.currentSource !== ''
                 ? <Player info={this.state} />
                 : null

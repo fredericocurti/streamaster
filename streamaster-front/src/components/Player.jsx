@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigation';
 import Paper from 'material-ui/Paper';
 import FontIcon from 'material-ui/FontIcon'
-import player from '../helpers/player'
+import spotify from '../helpers/spotify'
 
 class Player extends Component{
     constructor(props){
@@ -10,21 +10,30 @@ class Player extends Component{
       this.state = {
         selectedIndex : 1,
         playing : true
+      } 
+    }
+
+    componentWillMount(){
+      if (this.props.info.currentSource == 'spotify') {
+        spotify.play(this.props.info.currentTrack)
+      } else if (this.props.info.currentSource == 'youtube') {
+        // faz algo com a api do youtube p/ tocar 
       }
-      
     }
 
     togglePlayback = () => {
       if (this.state.playing && this.props.info.currentSource == 'spotify'){
-        player.play(this.props.info.currentTrack)
+        spotify.pause()        
       } else if (this.props.info.currentSource == 'spotify') {
-        player.pause()
+        spotify.resume()
       }
       this.setState({ playing : !this.state.playing })
     }
 
     componentWillReceiveProps(nextProps){
-      console.log(nextProps)
+      if (this.props.info.currentTrack != nextProps.info.currentTrack){
+        spotify.play(nextProps.info.currentTrack)
+      }
     }
 
     render() {
@@ -32,9 +41,9 @@ class Player extends Component{
       const playIcon =  <FontIcon className="material-icons">pause</FontIcon>
 
       const getSongName = () => {
-        if (this.props.info.currentSource == 'spotify'){
+        if (this.props.info.currentSource == 'spotify') {
           return this.props.info.currentTrack.name
-        } else if (this.props.info.currentSource == 'youtube'){
+        } else if (this.props.info.currentSource == 'youtube') {
           return this.props.info.currentVideo.snippet.title
         }
       }
