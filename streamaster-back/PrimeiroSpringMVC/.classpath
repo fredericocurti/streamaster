@@ -24,7 +24,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="/home/bruna/Documentos/Bruna/Insper/4 semestre/Tec Web/mysql-connector-java-5.1.43/mysql-connector-java-5.1.43/mysql-connector-java-5.1.43-bin.jar"/>
-	<classpathentry kind="lib" path="/home/bruna/Área de Trabalho/apache-tomcat-8.0.46/lib/jsp-api.jar"/>
-	<classpathentry kind="lib" path="/home/bruna/Área de Trabalho/apache-tomcat-8.0.46/lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path="/home/bruna/Documentos/Bruna/Insper/4 semestre/Tec Web/apache-tomcat-8.0.46/lib/jsp-api.jar"/>
+	<classpathentry kind="lib" path="/home/bruna/Documentos/Bruna/Insper/4 semestre/Tec Web/apache-tomcat-8.0.46/lib/servlet-api.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
