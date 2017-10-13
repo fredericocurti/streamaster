@@ -29,7 +29,7 @@ export default window.spotify = {
 
   requestToken : function(callback){
     const params = {
-            scope         : 'user-modify-playback-state',
+            scope         : 'user-modify-playback-state user-read-currently-playing' ,
             client_id     : spotifyConfig.client_id,
             response_type : 'token',
             redirect_uri  : spotifyConfig.redirect_uri,
@@ -103,7 +103,9 @@ export default window.spotify = {
         if (res.status == 204){
             console.log('Successfully playing track ' + track.name)
         }
-    })
+        return res.json();
+    }).then(data => console.log(data)).catch(e => console.log(e))
+    
 
 },
 
@@ -121,6 +123,42 @@ pause : function(){
         }
     })
 },
+
+seek : function(time){
+    let params = new URLSearchParams(Object.entries({
+      position_ms : time
+    }))
+    let request = { 
+        method : 'PUT',
+        headers : {
+            'Authorization' : 'Bearer ' + this.getToken(),
+            'Content-Type' : 'application/json',
+        }
+    }
+
+    fetch('https://api.spotify.com/v1/me/player/seek?'+params,request).then((res) => {
+        if (res.status == 204){
+          console.log('Successfully seeked track')
+        }
+    })
+},
+
+//currently_playing : function(){
+//    let request = { 
+//      method : 'GET',
+//      headers : {
+//          'Authorization' : 'Bearer ' + this.getToken(),
+//          'Content-Type' : 'application/json',
+//      },
+//  }
+//
+//  fetch('https://api.spotify.com/v1/me/player/currently-playing',request).then((res) => {
+//    let data= res.json("position_ms");
+//    console.log("Debug, ", )
+//    return res
+//  })
+//},
+
 
 resume : function(){
     let request = {
