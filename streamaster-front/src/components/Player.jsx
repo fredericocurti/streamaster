@@ -60,7 +60,7 @@ class Player extends Component{
     render() {
       const pauseIcon = <FontIcon className="material-icons">play_arrow</FontIcon>
       const playIcon =  <FontIcon className="material-icons">pause</FontIcon>
-      const icone = "bla"
+      const timeIcon = <FontIcon className="material-icons">schedule</FontIcon>
 
       
       const getSongName = () => {
@@ -98,7 +98,7 @@ class Player extends Component{
               <Slider style={{width: 1200}} value={this.state.slider} onChange={this.handleFirstSlider} />
               <BottomNavigationItem
               label={getMaxTime()}
-              icon={this.state.playing ? playIcon : pauseIcon}
+              icon={this.state.playing ? timeIcon : timeIcon}
               />
             </BottomNavigation>
             
