@@ -10,7 +10,9 @@ class Player extends Component{
       this.state = {
         selectedIndex : 1,
         playing : true,
-        slider: 0.0
+        slider: 0.0,
+        min: 0,
+        sec: 0
       }
 
       setInterval(this.timeTest, 1000);
@@ -20,8 +22,10 @@ class Player extends Component{
       if (this.state.playing == true){
         let total= this.props.info.currentTrack.duration_ms
         let current = this.state.slider + 1000/total
-
+        let max_min = this.props.info.currentTrack.duration_ms/60000
+        let max_sec = (this.props.info.currentTrack.duration_ms%60000)/1000
         this.setState({slider: current });
+        //fazer o timer crescente ?????
       }
     }
 
