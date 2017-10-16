@@ -4,37 +4,37 @@ import Paper from 'material-ui/Paper';
 import FontIcon from 'material-ui/FontIcon';
 import spotify from '../helpers/spotify';
 import Slider from 'material-ui/Slider';
+import {debounce} from 'lodash'
+import moment from 'moment'
+require("moment-duration-format");
+
+
 class Player extends Component{
     constructor(props){
       super(props)
       this.state = {
         selectedIndex : 1,
         playing : true,
-        slider: 0.0,
-        min: 0,
-        sec: 0
-      }
-
-      setInterval(this.timeTest, 1000);
+        dragging : false,
+        slider: 0.0
+      } // this.slideUpdate = debounce(this.handleSlider, 500)
     }
 
-    timeTest = () => {
-      if (this.state.playing == true){
-        let total= this.props.info.currentTrack.duration_ms
-        let current = this.state.slider + 1000/total
-       // let max_min = this.props.info.currentTrack.duration_ms/60000
-       // let max_sec = (this.props.info.currentTrack.duration_ms%60000)/1000
-        this.setState({slider: current });
-        //fazer o timer crescente ?????
-      }
-    }
 
     componentWillMount(){
+      this.interval = setInterval(this.tick, 1000);
       if (this.props.info.currentSource == 'spotify') {
         spotify.play(this.props.info.currentTrack)
         this.setState({slider: 0.0})
       } else if (this.props.info.currentSource == 'youtube') {
         // faz algo com a api do youtube p/ tocar 
+      }
+    }
+
+    componentWillReceiveProps(nextProps){
+      if (this.props.info.currentTrack != nextProps.info.currentTrack) {
+        spotify.play(nextProps.info.currentTrack)
+        this.setState({slider: 0.0 })
       }
     }
 
@@ -47,26 +47,51 @@ class Player extends Component{
       this.setState({ playing : !this.state.playing })
     }
 
-    componentWillReceiveProps(nextProps){
-      if (this.props.info.currentTrack != nextProps.info.currentTrack){
-        spotify.play(nextProps.info.currentTrack)
-        this.setState({slider: 0.0 })
+    
+    tick = () => {
+      if (this.props.info.currentSource == 'spotify') {
+        if (this.state.playing == true 
+            && this.state.dragging == false
+            && this.state.slider <= this.props.info.currentTrack.duration_ms/1000 - 1) {
+          let current = this.state.slider + 1
+          this.setState({ slider: current });
+        }
       }
     }
 
-    handleFirstSlider = (event, value) => {
-      this.setState({slider: value});
-      spotify.seek(parseInt(value*this.props.info.currentTrack.duration_ms))
-    };
-
     
+    
+    onSlide = (event, value) => {
+      this.setState({ slider: value });
+    };
+    
+    onSliderStop = () => {
+      spotify.seek(parseInt(this.state.slider * 1000),(status) => {
+        if (status == 204){
+          this.setState({ dragging : false })
+        }
+      })
+    }
 
     render() {
       const pauseIcon = <FontIcon className="material-icons">play_arrow</FontIcon>
       const playIcon =  <FontIcon className="material-icons">pause</FontIcon>
       const timeIcon = <FontIcon className="material-icons">schedule</FontIcon>
 
-      
+      const getArtistsNames = () => {
+        let names = ''
+        let i = 0
+        if (this.props.info.currentSource == 'spotify'){
+          for (i ; i < this.props.info.currentTrack.artists.length ; i ++){
+            if ( i < this.props.info.currentTrack.artists.length - 1 ){
+                names += this.props.info.currentTrack.artists[i].name + ', '
+            } else {
+                names += this.props.info.currentTrack.artists[i].name
+            }
+        }
+        return names
+        }
+      }  
       const getSongName = () => {
         if (this.props.info.currentSource == 'spotify') {
           return this.props.info.currentTrack.name
@@ -74,11 +99,27 @@ class Player extends Component{
           return this.props.info.currentVideo.snippet.title
         }
       }
+
       const getMaxTime = () => {
         if (this.props.info.currentSource == 'spotify'){
-          return (parseInt(this.props.info.currentTrack.duration_ms/60000).toString()+":"+parseInt((this.props.info.currentTrack.duration_ms%60000)/1000).toString())
+          let mt = moment.utc(this.props.info.currentTrack.duration_ms).format('mm:ss')
+          return mt
         }
       }
+
+      const getCurrentTime = () => {
+        if (this.props.info.currentSource == 'spotify'){
+          let ct = moment.utc(this.state.slider * 1000).format('mm:ss')
+          return ct
+        }
+      }
+
+      const getSliderMax = () => {
+        if (this.props.info.currentSource == 'spotify') {
+          return parseInt(this.props.info.currentTrack.duration_ms / 1000)
+        }
+      }
+
 
       const styles = {
         root: {
@@ -89,19 +130,31 @@ class Player extends Component{
         return (
           <Paper zDepth={1} className='player-wrapper'>
             <BottomNavigation selectedIndex={this.state.selectedIndex} style={styles.root}>
+              
+              <img className='player-thumbnail' src={this.props.info.currentTrack.album.images[2].url} width={50}/>
+              
               <BottomNavigationItem
-                label={this.state.playing ? 'Tocando' : 'Pausado'}
+                label={getSongName()}
                 icon={this.state.playing ? playIcon : pauseIcon}
                 onClick={this.togglePlayback}
               />
-              <BottomNavigationItem
-              label={getSongName()}
-              icon={this.state.playing ? playIcon : pauseIcon}
-              />
               
-              <Slider style={{width: 1200}} value={this.state.slider} onChange={this.handleFirstSlider} />
+              <Slider 
+                style={{width: '50%'}} 
+                value={this.state.slider} 
+                onChange={this.onSlide}
+                onDragStart={()=> {this.setState({dragging : true})}}
+                onDragStop={this.onSliderStop}
+                max={getSliderMax()}
+                min={0}
+                step={1}
+
+              />
+
+              
+
               <BottomNavigationItem
-              label={getMaxTime()}
+              label={getCurrentTime() + ' | ' + getMaxTime()}
               icon={this.state.playing ? timeIcon : timeIcon}
               />
             </BottomNavigation>

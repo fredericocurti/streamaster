@@ -124,7 +124,7 @@ pause : function(){
     })
 },
 
-seek : function(time){
+seek : function(time,callback){
     let params = new URLSearchParams(Object.entries({
       position_ms : time
     }))
@@ -139,6 +139,7 @@ seek : function(time){
     fetch('https://api.spotify.com/v1/me/player/seek?'+params,request).then((res) => {
         if (res.status == 204){
           console.log('Successfully seeked track')
+          callback(204)
         }
     })
 },

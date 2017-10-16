@@ -259,3 +259,8 @@ input {
   width: 100%;
   bottom : 0px;
 }
+
+.player-thumbnail{
+  display : block !important;
+  flex : none !important;
+}
