@@ -58,8 +58,6 @@ class Player extends Component{
         }
       }
     }
-
-    
     
     onSlide = (event, value) => {
       this.setState({ slider: value });
@@ -134,7 +132,7 @@ class Player extends Component{
               />
               
               <Slider 
-                style={{width: '50%'}} 
+                style={{width: 1200}} 
                 value={this.state.slider} 
                 onChange={this.onSlide}
                 onDragStart={()=> {this.setState({dragging : true})}}
@@ -145,11 +143,9 @@ class Player extends Component{
 
               />
 
-              
-
               <BottomNavigationItem
               label={getCurrentTime() + ' | ' + getMaxTime()}
-              icon={this.state.playing ? timeIcon : timeIcon}
+              icon={timeIcon}
               />
             </BottomNavigation>
             
