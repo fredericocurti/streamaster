@@ -140,7 +140,7 @@ class Main extends Component {
                 {/* <Slider/> */}
                 { this.state.lastSearch !== '' 
                 ?   <div className='row container tracks-container'>
-                        <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700}>
+                        {/* <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700}> */}
                             <img src={spotifyLogo} width={200}/>
                             { this.state.spotifyResults.map((track) => <Track key={track.id} track={track} onClick={this.onSpotifyClick} /> )}
 
@@ -150,7 +150,7 @@ class Main extends Component {
                                 style={{margin:15}}
                             />
                             { this.state.youtubeResults.map((video) => <Video key={video.id.videoId} info={video} onClick={this.onYoutubeClick}/> )}
-                        </ReactCSSTransitionGroup>          
+                        {/* </ReactCSSTransitionGroup>           */}
                     </div>
                 :   null    
                 }

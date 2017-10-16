@@ -263,4 +263,6 @@ input {
 .player-thumbnail{
   display : block !important;
   flex : none !important;
+  width: 56px;
+  height: 56px;
 }

@@ -120,23 +120,17 @@ class Player extends Component{
         }
       }
 
-
-      const styles = {
-        root: {
-          width: 1200
-        },
-      };
-
         return (
           <Paper zDepth={1} className='player-wrapper'>
-            <BottomNavigation selectedIndex={this.state.selectedIndex} style={styles.root}>
+            <BottomNavigation selectedIndex={this.state.selectedIndex}>
               
-              <img className='player-thumbnail' src={this.props.info.currentTrack.album.images[2].url} width={50}/>
+              <img className='player-thumbnail' src={this.props.info.currentTrack.album.images[2].url}/>
               
               <BottomNavigationItem
                 label={getSongName()}
                 icon={this.state.playing ? playIcon : pauseIcon}
                 onClick={this.togglePlayback}
+                style={{width: 300}}
               />
               
               <Slider 
