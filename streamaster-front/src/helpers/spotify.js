@@ -87,7 +87,7 @@ export default window.spotify = {
     return spotifyConfig.token
   },
 
-  play : function(track){
+  play : function(track,callback){
     console.log(track.uri)
     let request = {
         method : 'PUT',
@@ -102,6 +102,7 @@ export default window.spotify = {
     fetch('https://api.spotify.com/v1/me/player/play',request).then((res) => {
         if (res.status == 204){
             console.log('Successfully playing track ' + track.name)
+            callback()
         }
         return res.json();
     }).then(data => console.log(data)).catch(e => console.log(e))

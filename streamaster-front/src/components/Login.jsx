@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
 import RaisedButton from 'material-ui/RaisedButton'
+import Avatar from 'material-ui/Avatar'
 import TextField from 'material-ui/TextField'
 import Card from 'material-ui/Card'
 import auth from '../helpers/auth.js'
@@ -15,10 +16,12 @@ class Login extends Component {
             open : false,
             error : '',
             dialogState : 'login',
+            imageFile : null,
+            imageBlob : null,
             textFields : {
               email : '',
               password : '',
-              userName : ''
+              userName : '',
             }
           }
     }
@@ -51,9 +54,9 @@ handleOpen = () => {
   }
 
   handleRegister = () => {
-    auth.register(this.state.textFields.email,this.state.textFields.userName,this.state.textFields.password,(result) => {
+    auth.register(this.state.textFields.email,this.state.textFields.userName,this.state.textFields.password,this.state.imageBlob, (result) => {
       if (result.status == "SUCCESS"){
-        this.setState({ open:false, auth: auth.getUser() })
+        this.setState({ open : false, auth : auth.getUser() })
       } else if (result.status == "FAILURE"){
         this.setState({ error : "Ocorreu um problema. Provavelmente um usuário com essas credenciais já existe"})
       }
@@ -65,6 +68,20 @@ handleOpen = () => {
       this.setState({ dialogState : 'register' })
     } else {
       this.setState({ dialogState : 'login' })
+    }
+  }
+
+  onFileChange = () => {
+    let file = this.fileInput.files[0]
+    let reader  = new FileReader();
+    console.log(file)
+
+    reader.addEventListener("load",  () => {
+      this.setState({ imageBlob : reader.result, imageFile : file })
+    }, false);
+  
+    if (file) {
+      reader.readAsDataURL(file);
     }
   }
 
@@ -149,6 +166,12 @@ handleOpen = () => {
                   }
                 }}
               />
+              <Avatar 
+                className='login-avatar'
+                src={this.state.imageBlob} 
+                onClick={() => { this.fileInput.click() }}
+              />
+              <input name="myFile" style={{display : 'none'}} type="file" ref={(input) => { this.fileInput = input }} onChange={this.onFileChange} />
               <div className='centered col s12' style={{color : 'red'}}>
                 {this.state.error}
               </div>

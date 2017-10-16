@@ -24,29 +24,59 @@ class Player extends Component{
     componentWillMount(){
       this.interval = setInterval(this.tick, 1000);
       if (this.props.info.currentSource == 'spotify') {
-        spotify.play(this.props.info.currentTrack)
-        this.setState({slider: 0.0})
+        spotify.play(this.props.info.currentTrack,() => {
+        })
       } else if (this.props.info.currentSource == 'youtube') {
-        // faz algo com a api do youtube p/ tocar 
+        // faz algo com a api do youtube p/ tocar
+
       }
     }
 
     componentWillReceiveProps(nextProps){
-      if (this.props.info.currentTrack != nextProps.info.currentTrack) {
-        spotify.play(nextProps.info.currentTrack)
-        this.setState({slider: 0.0 })
+      if (this.props.info.currentSource != nextProps.info.currentSource) {
+        console.log('[Player] Switched source to ' + nextProps.info.currentSource)
+        this.setState({ slider : 0 })
+
+        if (nextProps.info.currentSource == 'youtube') {
+          spotify.pause()
+          console.log('[Player] Current source is YouTube, pausing Spotify')
+        }
+  
+        if (nextProps.info.currentSource == 'spotify') {
+          spotify.play(nextProps.info.currentTrack, () => {
+            this.setState({ slider: 0.0, playing : true })
+          })
+        }
+
       }
+
+      if (this.props.info.currentSource == 'spotify') {
+        if (this.props.info.currentTrack != nextProps.info.currentTrack) {
+          console.log('[Player] Player switched songs')
+          spotify.play(nextProps.info.currentTrack, () => {
+            this.setState({ slider: 0.0, playing : true })
+          }) 
+        }
+      }
+     
     }
 
     togglePlayback = () => {
-      if (this.state.playing && this.props.info.currentSource == 'spotify'){
-        spotify.pause()        
-      } else if (this.props.info.currentSource == 'spotify') {
-        spotify.resume()
+      if (this.props.info.currentSource == 'spotify') {
+        if (this.state.playing) {
+          spotify.pause()
+        } else {
+          spotify.resume()
+        }
+      } else if (this.props.info.currentSource == 'youtube'){
+        if (this.state.playing){
+          this.youtubePlayer().pauseVideo()
+        } else {
+          this.youtubePlayer().playVideo()
+        }
       }
       this.setState({ playing : !this.state.playing })
     }
-
     
     tick = () => {
       if (this.props.info.currentSource == 'spotify') {
@@ -56,19 +86,29 @@ class Player extends Component{
           let current = this.state.slider + 1
           this.setState({ slider: current });
         }
+      } else if (this.props.info.currentSource == 'youtube'){
+        this.setState({ slider : this.youtubePlayer().getCurrentTime() })
       }
     }
-    
+
     onSlide = (event, value) => {
       this.setState({ slider: value });
     };
     
     onSliderStop = () => {
-      spotify.seek(parseInt(this.state.slider * 1000),(status) => {
-        if (status == 204){
-          this.setState({ dragging : false })
-        }
-      })
+      if (this.props.info.currentSource == 'spotify') {
+        spotify.seek(parseInt(this.state.slider * 1000),(status) => {
+          if (status == 204) {
+            this.setState({ dragging : false })
+          }
+        })
+      } else if (this.props.info.currentSource == 'youtube'){
+        this.youtubePlayer().seekTo(this.state.slider)
+      }
+    }
+
+    youtubePlayer = () => {
+      return this.props.youtubePlayer
     }
 
     render() {
@@ -79,7 +119,7 @@ class Player extends Component{
       const getArtistsNames = () => {
         let names = ''
         let i = 0
-        if (this.props.info.currentSource == 'spotify'){
+        if (this.props.info.currentSource == 'spotify') {
           for (i ; i < this.props.info.currentTrack.artists.length ; i ++){
             if ( i < this.props.info.currentTrack.artists.length - 1 ){
                 names += this.props.info.currentTrack.artists[i].name + ', '
@@ -89,7 +129,8 @@ class Player extends Component{
         }
         return names
         }
-      }  
+      }
+
       const getSongName = () => {
         if (this.props.info.currentSource == 'spotify') {
           return this.props.info.currentTrack.name
@@ -102,6 +143,9 @@ class Player extends Component{
         if (this.props.info.currentSource == 'spotify'){
           let mt = moment.utc(this.props.info.currentTrack.duration_ms).format('mm:ss')
           return mt
+        } else if ( this.props.info.currentSource == 'youtube'){
+          let mt = moment.utc(this.youtubePlayer().getDuration() * 1000).format('mm:ss')
+          return mt
         }
       }
 
@@ -109,12 +153,25 @@ class Player extends Component{
         if (this.props.info.currentSource == 'spotify'){
           let ct = moment.utc(this.state.slider * 1000).format('mm:ss')
           return ct
+        } else if ( this.props.info.currentSource == 'youtube'){
+          let ct = moment.utc(this.youtubePlayer().getCurrentTime() * 1000).format('mm:ss')
+          return ct
         }
       }
 
       const getSliderMax = () => {
         if (this.props.info.currentSource == 'spotify') {
           return parseInt(this.props.info.currentTrack.duration_ms / 1000)
+        } else if (this.props.info.currentSource == 'youtube') {
+          return parseInt(this.youtubePlayer().getDuration())
+        }
+      }
+
+      const getThumbnail = () => {
+        if (this.props.info.currentSource == 'spotify') {
+          return this.props.info.currentTrack.album.images[2].url
+        } else if (this.props.info.currentSource == 'youtube'){
+          return this.props.info.currentVideo.snippet.thumbnails.default.url
         }
       }
 
@@ -122,7 +179,7 @@ class Player extends Component{
           <Paper zDepth={1} className='player-wrapper'>
             <BottomNavigation selectedIndex={this.state.selectedIndex}>
               
-              <img className='player-thumbnail' src={this.props.info.currentTrack.album.images[2].url}/>
+              <img className='player-thumbnail' src={getThumbnail()}/>
               
               <BottomNavigationItem
                 label={getSongName()}
@@ -132,7 +189,6 @@ class Player extends Component{
               />
               
               <Slider 
-                style={{width: 1200}} 
                 value={this.state.slider} 
                 onChange={this.onSlide}
                 onDragStart={()=> {this.setState({dragging : true})}}
@@ -145,7 +201,7 @@ class Player extends Component{
 
               <BottomNavigationItem
               label={getCurrentTime() + ' | ' + getMaxTime()}
-              icon={timeIcon}
+              icon={this.state.playing ? timeIcon : timeIcon}
               />
             </BottomNavigation>
             

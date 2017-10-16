@@ -28,7 +28,8 @@ class Main extends Component {
             currentSource : '',
             currentVideo : null, 
             currentTrack : null,
-            youtubePlayer : null
+            youtubePlayer : null,
+            youtubePicked : false
         }
     }
 
@@ -60,11 +61,11 @@ class Main extends Component {
     }
 
     onYoutubeClick = (video) => {
-        this.setState({currentVideo : video , currentSource : 'youtube'})
+        this.setState({ currentVideo : video , youtubePicked : true })
     }
 
     onSpotifyClick = (track) => {
-        this.setState({currentTrack : track , currentSource : 'spotify'})
+        this.setState({currentTrack : track , currentSource : 'spotify', youtubePicked : false })
     }
  
     onYouTubeStateChange = (event) => {
@@ -73,8 +74,7 @@ class Main extends Component {
 
     onYouTubeReady = (event) => {
         // O objeto this.state.youtubePlayer só irá existir
-        console.log('youtube ready')
-        this.setState({youtubePlayer : event.target})
+        this.setState({ currentSource : 'youtube' , youtubePlayer : event.target })
     }
 
     render() {
@@ -97,7 +97,7 @@ class Main extends Component {
 
         return (
             <div>
-                { this.state.currentSource === 'youtube'
+                { this.state.youtubePicked === true
                 ?   <Draggable
                         axis="both"
                         handle=".handle"
@@ -140,23 +140,30 @@ class Main extends Component {
                 {/* <Slider/> */}
                 { this.state.lastSearch !== '' 
                 ?   <div className='row container tracks-container'>
-                        {/* <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700}> */}
+                        <div className='col s6 tracks-col'>
+                        
                             <img src={spotifyLogo} width={200}/>
-                            { this.state.spotifyResults.map((track) => <Track key={track.id} track={track} onClick={this.onSpotifyClick} /> )}
-
-                            <div className='divider'/>
+                            {/* <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700}> */}
+                            { this.state.spotifyResults.map((track) => <Track key={track.id} track={track} onClick={this.onSpotifyClick} /> ).slice(0,10)}
+                            {/* </ReactCSSTransitionGroup> */}
+                        </div>
+                        {/* <div className='divider'/> */}
+                        <div className='col s6 tracks-col'>
                             <img src='https://www.youtube.com/yt/about/media/images/brand-resources/logos/YouTube-logo-full_color_light.svg'
                                 width={200}
                                 style={{margin:15}}
                             />
+                        {/* <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700}> */}
                             { this.state.youtubeResults.map((video) => <Video key={video.id.videoId} info={video} onClick={this.onYoutubeClick}/> )}
-                        {/* </ReactCSSTransitionGroup>           */}
+                        {/* </ReactCSSTransitionGroup>  */}
+                        </div>
+                        
                     </div>
                 :   null    
                 }
 
                 { this.state.currentSource !== ''
-                ? <Player info={this.state} />
+                ? <Player info={this.state} youtubePlayer={this.state.youtubePlayer}/>
                 : null
                 }
                 

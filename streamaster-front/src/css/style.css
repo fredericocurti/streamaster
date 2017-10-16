@@ -266,3 +266,7 @@ input {
   width: 56px;
   height: 56px;
 }
+
+.tracks-col{
+  padding: 10px !important;
+}

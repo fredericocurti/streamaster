@@ -30,6 +30,9 @@
 .track {
     background-color: white;
     margin: 5px !important;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
 }
 
 .row .col{
@@ -71,3 +74,8 @@ input {
     width: 0px;
     transition: 700ms;
   }
+
+.login-avatar{
+    width: 60px !important;
+    height: 60px !important;
+}

@@ -54,29 +54,28 @@ export default window.auth = {
         return user
     },
 
-    register : (email,username,password,callback) => {
+    register : (email,username,password,imageBlob,callback) => {
+        var fd = new FormData();
+        fd.append('email',email)
+        fd.append('username',username)
+        fd.append('password',password)
+        fd.append('blob',imageBlob);
+
         console.log('Registering with',email,password)
-        fetch(baseUrl + 'register', {
+        fetch('http://10.92.44.177:8080/PrimeiroSpringMVC/storeImage', {
             method: 'POST',
-            body : JSON.stringify({
-                action : 'REGISTER',
-                payload : {
-                    email : email,
-                    username : username,
-                    password : password
-                }
-            })
+            body : fd
         }).then((response) => {
-            var data = response.json().then((data) => {
-                if (data.status == "SUCCESS") {
-                    console.log( '[Auth] Register Successful ',data)
-                    localStorage.setItem('user',JSON.stringify(data.payload))
-                    user = data.payload
-                } else if (data.status == "FAILURE") {
-                    console.log('[Auth] Auth failed,error ' + data.status)
-                }
-                callback(data)
-            })
+            console.log(response)
+            // var data = response.json().then((data) => {
+            //     if (data.status == "SUCCESS") {
+            //         console.log( '[Auth] Register Successful ',data)
+            //         localStorage.setItem('user',JSON.stringify(data.payload))
+            //         user = data.payload
+            //     } else if (data.status == "FAILURE") {
+            //         console.log('[Auth] Auth failed,error ' + data.status)
+            //     }
+                callback("eae")
         })
     },
 
