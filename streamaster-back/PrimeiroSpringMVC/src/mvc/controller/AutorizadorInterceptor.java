@@ -11,10 +11,12 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
 		public boolean preHandle(HttpServletRequest request,
 				HttpServletResponse response, Object controller) throws Exception {
 		String uri = request.getRequestURI();
-		if( uri.endsWith("registro") ||
+		if( uri.endsWith("register") ||
 			uri.endsWith("efetuaRegistro") ||
 			uri.endsWith("loginForm") ||
 			uri.endsWith("efetuaLogin") ||
+			uri.endsWith("storeImage") ||
+			uri.endsWith("login") ||
 			uri.endsWith("getImage") ) {
 			return true;
 		}

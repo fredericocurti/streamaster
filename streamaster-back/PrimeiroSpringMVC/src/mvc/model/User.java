@@ -1,12 +1,12 @@
 package mvc.model;
 import org.springframework.web.multipart.MultipartFile;
 
-public class Tarefa {
+public class User {
 	private Integer id;
 	private String name;
 	private String password;
 	private String email;
-	private MultipartFile image;
+	private String image;
 	
 	public Integer getId() {return id;}
 	public void setId(Integer id) {this.id = id;}
@@ -20,7 +20,7 @@ public class Tarefa {
 	public String getEmail() {return email;}
 	public void setEmail(String email) {this.email = email;}
 	
-	public MultipartFile getImage() {return image;}
-	public void setImage(MultipartFile image) {this.image = image;}
+	public String getImage() {return image;}
+	public void setImage(String image) {this.image = image;}
 
 }
