@@ -15,6 +15,7 @@ public class AutorizadorInterceptor extends HandlerInterceptorAdapter {
 			uri.endsWith("efetuaRegistro") ||
 			uri.endsWith("loginForm") ||
 			uri.endsWith("efetuaLogin") ||
+			uri.endsWith("storeImage") ||
 			uri.endsWith("getImage") ) {
 			return true;
 		}

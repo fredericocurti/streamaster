@@ -59,10 +59,10 @@ export default window.auth = {
         fd.append('email',email)
         fd.append('username',username)
         fd.append('password',password)
-        fd.append('blob',imageBlob);
+        fd.append('file',imageBlob);
 
         console.log('Registering with',email,password)
-        fetch('http://10.92.44.177:8080/PrimeiroSpringMVC/storeImage', {
+        fetch('http://localhost:8080/PrimeiroSpringMVC/storeImage', {
             method: 'POST',
             body : fd
         }).then((response) => {

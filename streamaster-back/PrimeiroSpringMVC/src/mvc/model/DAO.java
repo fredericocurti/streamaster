@@ -14,13 +14,13 @@ public class DAO {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 				connection = DriverManager.getConnection(
-							"jdbc:mysql://localhost/meus_dados", "root", "123456");
+							"jdbc:mysql://localhost/streamaster", "root", "root");
 		} catch (SQLException | ClassNotFoundException e) {e.printStackTrace();}
 	}
 	
 public void adiciona(Tarefa login) throws IOException {
-		MultipartFile filePart = login.getImage();
-		/* Rotina para salvar o arquivo no servidor*/
+	/*MultipartFile filePart = login.getImage();
+		 Rotina para salvar o arquivo no servidor
 		if (!filePart.isEmpty()) {
 			String fileName = filePart.getOriginalFilename();
 			File uploads = new File("/tmp");
@@ -28,14 +28,14 @@ public void adiciona(Tarefa login) throws IOException {
 				try (InputStream input = filePart.getInputStream()) {
 					Files.copy(input, file.toPath());
 				}
-		}
+		}*/
 		try {
 			String sql = "INSERT INTO login (name, password, email, image) values(?,?,?,?)";
 			PreparedStatement stmt = connection.prepareStatement(sql);
 			stmt.setString(1,login.getName());
 			stmt.setString(2,login.getPassword());
 			stmt.setString(3,login.getEmail());
-			stmt.setBinaryStream(4, filePart.getInputStream());
+			stmt.setString(4,login.getImage());
 			stmt.execute();
 			stmt.close();
 		} catch (SQLException e) {e.printStackTrace();}
