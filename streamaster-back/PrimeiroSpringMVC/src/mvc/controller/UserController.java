@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.json.JSONObject;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -14,10 +15,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import mvc.model.DAO;
-import mvc.model.Tarefa;
+import mvc.model.User;
 
 @Controller
-public class TarefasController {
+public class UserController {
 	
 	@RequestMapping("/")
 	public String execute() {
@@ -25,8 +26,8 @@ public class TarefasController {
 		return "info";
 	}
 	
-	@RequestMapping(value = "storeImage", method = RequestMethod.POST)
-	public void storeImage(
+	@RequestMapping(value = "register", method = RequestMethod.POST)
+	public void register(
 			@RequestParam("file") String file,
 			@RequestParam("email") String email,
 			@RequestParam("username") String username,
@@ -37,15 +38,15 @@ public class TarefasController {
 		System.out.println(username);
 		System.out.println(password);
 		
-		
-		Tarefa usuario = new Tarefa();
+		User usuario = new User();	
 		usuario.setName(username);
 		usuario.setPassword(password);
 		usuario.setEmail(email);
 		usuario.setImage(file);
 		
 		DAO dao = new DAO();
-		dao.adiciona(usuario);
+		JSONObject res = dao.adiciona(usuario);
+		response.getWriter().println(res);
 		//MultipartFile image = file.
 		//response.setContentType("image/jpeg, image/jpg, image/png, image/gif");
 		//response.getOutputStream().write(dao.buscaFoto(login));
@@ -58,7 +59,7 @@ public class TarefasController {
 	}
 	
 	@RequestMapping("efetuaLogin")
-	public String efetuaLogin(Tarefa login, HttpSession session) {
+	public String efetuaLogin(User login, HttpSession session) {
 		if(new DAO().existeUsuario(login)) {
 			session.setAttribute("usuarioLogado", login.getName());
 			return "menu";
@@ -71,14 +72,29 @@ public class TarefasController {
 		return "redirect:loginForm";
 	}
 	
-	@RequestMapping(value = "getImage", method = RequestMethod.GET)
-	public void showImage(@RequestParam("login") String login, HttpServletResponse
-			response,HttpServletRequest request)
-					throws ServletException, IOException{
+	@RequestMapping(value = "login", method = RequestMethod.POST)
+	public void login(
+			@RequestParam("email") String email,
+			@RequestParam("password") String password,
+			HttpServletResponse response,
+			HttpServletRequest request) throws ServletException, IOException {
 		DAO dao = new DAO();
-		response.setContentType("image/jpeg, image/jpg, image/png, image/gif");
-		response.getOutputStream().write(dao.buscaFoto(login));
-		response.getOutputStream().close();
+		JSONObject res = dao.login(email, password);
+		response.getWriter().println(res);
+		/*response.setContentType("image/jpeg, image/jpg, image/png, image/gif");
+		
+		response.getOutputStream().close();*/
+	}
+	
+	@RequestMapping(value = "test")
+	public void test(
+			HttpServletResponse response,
+			HttpServletRequest request) throws ServletException, IOException {
+		DAO dao = new DAO();
+		response.getWriter().println("aebru");
+		/*response.setContentType("image/jpeg, image/jpg, image/png, image/gif");
+		
+		response.getOutputStream().close();*/
 	}
 	
 	

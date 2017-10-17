@@ -1,7 +1,7 @@
 package mvc.model;
 import org.springframework.web.multipart.MultipartFile;
 
-public class Tarefa {
+public class User {
 	private Integer id;
 	private String name;
 	private String password;

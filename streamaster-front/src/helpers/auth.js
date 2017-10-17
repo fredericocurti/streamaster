@@ -18,15 +18,13 @@ var user = {
 export default window.auth = {
     login : (email,password,callback) => {
         console.log('Logging in with',email,password)
+        var fd = new FormData();
+        fd.append('email',email)
+        fd.append('password',password)
+
         fetch(baseUrl + 'login', {
             method: 'POST',
-            body : JSON.stringify({
-                action : 'AUTH',
-                payload : {
-                    email : email,
-                    password : password
-                }
-            })
+            body : fd
         }).then((response) => {
             var data = response.json().then((data) => {
                 if (data.status == 200) {
@@ -62,11 +60,13 @@ export default window.auth = {
         fd.append('file',imageBlob);
 
         console.log('Registering with',email,password)
-        fetch('http://localhost:8080/PrimeiroSpringMVC/storeImage', {
+        fetch(baseUrl + 'register', {
             method: 'POST',
             body : fd
         }).then((response) => {
-            console.log(response)
+            response.json().then((data) => {
+                console.log(data)
+            })
             // var data = response.json().then((data) => {
             //     if (data.status == "SUCCESS") {
             //         console.log( '[Auth] Register Successful ',data)
