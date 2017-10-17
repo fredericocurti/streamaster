@@ -54,12 +54,12 @@ export default window.auth = {
         return user
     },
 
-    register : (email,username,password,imageBlob,callback) => {
+    register : (email,username,password,imageBase64,callback) => {
         var fd = new FormData();
         fd.append('email',email)
         fd.append('username',username)
         fd.append('password',password)
-        fd.append('blob',imageBlob);
+        fd.append('file',imageBase64);
 
         console.log('Registering with',email,password)
         fetch('http://10.92.44.177:8080/PrimeiroSpringMVC/storeImage', {

@@ -5,8 +5,15 @@ import FlatButton from 'material-ui/FlatButton';
 class Track extends Component {
     constructor(props){
         super(props)
+        this.state = {
+            thumbnailReady : false
+        }
     }
-
+    
+    componentWillMount() {
+        this.setState({ thumbnailReady : false })
+    }
+    
     getArtistsNames = () => {
         let names = ''
         let i = 0
@@ -28,13 +35,18 @@ class Track extends Component {
 
     render() {
         return (
-            <span className='col s12 track z-depth-1' onClick={this.onClick}>
+            <span 
+                className='col s12 track z-depth-1'
+                onClick={this.onClick}
+                style={{opacity : this.state.thumbnailReady ? 1 : 0}}
+            >
                 <img src={this.props.track.album.images[2].url} 
                     width={50} 
                     style={{verticalAlign : 'middle'}} 
-                    alt="" 
+                    alt=""
+                    onLoad={() => { this.setState({thumbnailReady : true})} }
                 />
-                <span> <b>{this.props.track.name}</b> - {this.getArtistsNames()} </span>
+                <span style={{ color : this.props.isCurrent ? 'purple' : 'black' }}> <b>{this.props.track.name}</b> - {this.getArtistsNames()} </span>
             </span>
         )
     }

@@ -5,9 +5,13 @@ import FlatButton from 'material-ui/FlatButton';
 class Video extends Component {
     constructor(props){
         super(props)
+        this.state = {
+            thumbnailReady : false
+        }
     }
 
     componentWillMount(){
+        this.setState({ thumbnailReady : false })
     }
 
     getInfo = () => {
@@ -26,15 +30,20 @@ class Video extends Component {
     render() {
         const info = this.getInfo()
         return (
-            <span onClick={this.onClick} className='col s12 track z-depth-1'>
+            <span 
+                onClick={this.onClick} 
+                className='col s12 track z-depth-1' 
+                style={{opacity : this.state.thumbnailReady ? 1 : 0}}
+            >
                 <img src={this.props.info.snippet.thumbnails.default.url} 
                     style={{
                         verticalAlign : 'middle', width : 'auto',
                          height : 50, maxWidth: 50
-                    }} 
+                    }}
+                    onLoad={() => { this.setState({thumbnailReady : true})} }
                     alt="" 
                 />
-                <span> <b>{info.artist}</b> - {info.song} </span>
+                <span style={{ color : this.props.isCurrent ? 'purple' : 'black' }}> <b>{info.artist}</b> - {info.song} </span>
             </span>
         )
     }

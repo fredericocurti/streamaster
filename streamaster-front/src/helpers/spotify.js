@@ -145,6 +145,26 @@ seek : function(time,callback){
     })
 },
 
+setVolume : function(volume){
+  let params = new URLSearchParams(Object.entries({
+      volume_percent : volume
+  }))
+
+  let request = { 
+        method : 'PUT',
+        headers : {
+            'Authorization' : 'Bearer ' + this.getToken(),
+            'Content-Type' : 'application/json',
+        }
+    }
+
+    fetch('https://api.spotify.com/v1/me/player/volume?'+params,request).then((res) => {
+        if (res.status == 204){
+          console.log('Successfully changed volume')
+        }
+    })
+},
+
 //currently_playing : function(){
 //    let request = { 
 //      method : 'GET',

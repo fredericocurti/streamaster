@@ -2,10 +2,15 @@ import React, { Component } from 'react';
 import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigation';
 import Paper from 'material-ui/Paper';
 import FontIcon from 'material-ui/FontIcon';
+import IconButton from 'material-ui/IconButton';
 import spotify from '../helpers/spotify';
 import Slider from 'material-ui/Slider';
 import {debounce} from 'lodash'
 import moment from 'moment'
+import ReactTooltip from 'react-tooltip'
+import getMuiTheme from 'material-ui/styles/getMuiTheme';
+
+
 require("moment-duration-format");
 
 
@@ -16,7 +21,8 @@ class Player extends Component{
         selectedIndex : 1,
         playing : true,
         dragging : false,
-        slider: 0.0
+        slider: 0.0,
+        volume : 0.75
       } // this.slideUpdate = debounce(this.handleSlider, 500)
     }
 
@@ -104,6 +110,7 @@ class Player extends Component{
         })
       } else if (this.props.info.currentSource == 'youtube'){
         this.youtubePlayer().seekTo(this.state.slider)
+        this.setState({ dragging : false })
       }
     }
 
@@ -111,10 +118,20 @@ class Player extends Component{
       return this.props.youtubePlayer
     }
 
+    changeVolume = () => {
+      if (this.props.info.currentSource == 'spotify'){
+        spotify.setVolume(this.state.volume * 100)
+      } else if (this.props.info.currentSource == 'youtube'){
+        this.youtubePlayer().setVolume(this.state.volume * 100)
+      }
+    
+    }
+ 
     render() {
       const pauseIcon = <FontIcon className="material-icons">play_arrow</FontIcon>
       const playIcon =  <FontIcon className="material-icons">pause</FontIcon>
       const timeIcon = <FontIcon className="material-icons">schedule</FontIcon>
+
 
       const getArtistsNames = () => {
         let names = ''
@@ -187,8 +204,11 @@ class Player extends Component{
                 onClick={this.togglePlayback}
                 style={{width: 300}}
               />
+ 
+              <span className='player-counter'> { getCurrentTime() } </span>
               
               <Slider 
+                className='player-slider'
                 value={this.state.slider} 
                 onChange={this.onSlide}
                 onDragStart={()=> {this.setState({dragging : true})}}
@@ -196,13 +216,38 @@ class Player extends Component{
                 max={getSliderMax()}
                 min={0}
                 step={1}
+                sliderStyle={{ marginTop : 20 }}
 
               />
 
+              <span className='player-counter'> { getMaxTime() } </span>
+
+              <IconButton
+                className='player-volume-icon'
+                tooltipPosition='top-center'                
+                tooltipStyles={{ top : -100 }}                
+                tooltip={
+                  <Slider 
+                    style={{height: 100, paddingBottom : 20 }} 
+                    axis="y" 
+                    value={this.state.volume}
+                    onChange={(ev,val) => { this.setState({ volume : val })}}
+                    onDragStop={this.changeVolume}
+                    step={0.05}
+                  />
+                }
+              >
+                <FontIcon className="material-icons">
+                  { this.state.volume !== 0 ? 'volume_up' : 'volume_off'} 
+                </FontIcon>
+              </IconButton>
+              {/* 
               <BottomNavigationItem
-              label={getCurrentTime() + ' | ' + getMaxTime()}
-              icon={this.state.playing ? timeIcon : timeIcon}
-              />
+                label={getCurrentTime() + ' | ' + getMaxTime()}
+                icon={this.state.playing ? timeIcon : timeIcon}
+              /> */
+              }
+
             </BottomNavigation>
             
           </Paper>

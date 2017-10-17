@@ -249,9 +249,19 @@ input {
   position: fixed; 
 }
 
-.handle{
+/* .handle{
   cursor: move;
-  height: 50px;
+  width: 250px;
+  height: 250px;
+  z-index: -1; position:relative;
+  background: rgba(0, 0, 0, .4);
+} */
+
+.handle {
+  cursor: move;
+  z-index: 999 !important;
+  width: 210px;
+  height: 210px;
 }
 
 .player-wrapper{
@@ -269,4 +279,11 @@ input {
 
 .tracks-col{
   padding: 10px !important;
+}
+
+.drag-test{
+  cursor: move;
+  width: 25px;
+  height: 25px;
+  z-index: -1;
 }

@@ -50,35 +50,35 @@ export default window.youtube = {
 //         fetch('https://accounts.google.com/o/oauth2/v2/auth?' + params , request )
 //     },
 
-    // sendAuthorizedApiRequest : function(requestDetails) {
-    //     let currentApiRequest = requestDetails;
-    //     if (isAuthorized) {
-    //         // Make API request
-    //         // gapi.client.request(requestDetails)
+        // sendAuthorizedApiRequest : function(requestDetails) {
+        //     let currentApiRequest = requestDetails;
+        //     if (isAuthorized) {
+        //         // Make API request
+        //         // gapi.client.request(requestDetails)
 
-    //         // Reset currentApiRequest variable.
-    //         currentApiRequest = {};
-    //     } else {
-    //         GoogleAuth.signIn()
-    //     }
-    // },
+        //         // Reset currentApiRequest variable.
+        //         currentApiRequest = {};
+        //     } else {
+        //         GoogleAuth.signIn()
+        //     }
+        // },
 
-    // updateSigninStatus : function(isSignedIn){
-    //     if (isSignedIn) {
-    //         let isAuthorized = true;
-    //         if (currentApiRequest) {
-    //             this.sendAuthorizedApiRequest(currentApiRequest);
-    //         }
-    //     } else {
-    //         let isAuthorized = false;
-    //     }
-    // },
+        // updateSigninStatus : function(isSignedIn){
+        //     if (isSignedIn) {
+        //         let isAuthorized = true;
+        //         if (currentApiRequest) {
+        //             this.sendAuthorizedApiRequest(currentApiRequest);
+        //         }
+        //     } else {
+        //         let isAuthorized = false;
+        //     }
+        // },
 
     searchVideos : function(query,callback){
         let params = new URLSearchParams(Object.entries({
             part : 'snippet',
             q : query,
-            maxResults : 10,
+            maxResults : 20,
             type: 'video',
             videoDuration : 'medium',
             key : 'AIzaSyBOP-sEHEIeeHhWrb_uWpmZUMQD3fc6Jrc'
@@ -91,6 +91,7 @@ export default window.youtube = {
         fetch('https://www.googleapis.com/youtube/v3/search?' + params , request )
         .then((res) => {
             res.json().then((videos) => {
+                console.log(videos)
                 callback(videos)
             })
         })

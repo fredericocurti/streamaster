@@ -3,7 +3,6 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
 import YouTube from 'react-youtube'
-
 import { Avatar,Card } from 'material-ui'
 import '../css/main.css'
 import SearchBar from './SearchBar'
@@ -73,7 +72,8 @@ class Main extends Component {
     }
 
     onYouTubeReady = (event) => {
-        // O objeto this.state.youtubePlayer só irá existir
+        // O objeto this.state.youtubePlayer só irá existir        
+        event.target.a.style.pointerEvents = 'none'
         this.setState({ currentSource : 'youtube' , youtubePlayer : event.target })
     }
 
@@ -94,6 +94,21 @@ class Main extends Component {
             }
         }
 
+        const isCurrent = (media) => {
+            if (this.state.currentSource == 'spotify') {
+                if (media == this.state.currentTrack) {
+                    return true
+                } else {
+                    return false
+                }
+            } else if ( this.state.currentSource == 'youtube') {
+                if (media == this.state.currentVideo){
+                    return true
+                } else {
+                    return false
+                }
+            }
+        }
 
         return (
             <div>
@@ -106,15 +121,19 @@ class Main extends Component {
                         grid={[25, 25]}
                         bounds='parent'
                     >
+                        
                         <Card>
-                            <div className='handle'> Drag me pls </div>
-                            <YouTube 
+                            <div
+                                className='youtube-overlay handle'
+                            >
+                            <YouTube
                                 videoId={getVideoId()}
                                 opts={opts}
                                 onStateChange={this.onYouTubeStateChange}
                                 ref={(YouTube) => { this.youtubePlayer = YouTube }}
                                 onReady={this.onYouTubeReady}
-                            />                            
+                            />
+                            </div>         
                         </Card>
                     </Draggable>
                 :  null
@@ -140,21 +159,21 @@ class Main extends Component {
                 {/* <Slider/> */}
                 { this.state.lastSearch !== '' 
                 ?   <div className='row container tracks-container'>
-                        <div className='col s6 tracks-col'>
+                        <div className='col s12 m6 tracks-col'>
                         
-                            <img src={spotifyLogo} width={200}/>
+                            <img src={spotifyLogo} width={150}/>
                             {/* <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700}> */}
-                            { this.state.spotifyResults.map((track) => <Track key={track.id} track={track} onClick={this.onSpotifyClick} /> ).slice(0,10)}
+                            { this.state.spotifyResults.map((track) => <Track isCurrent={isCurrent(track)} key={track.id} track={track} onClick={this.onSpotifyClick} /> )}
                             {/* </ReactCSSTransitionGroup> */}
                         </div>
                         {/* <div className='divider'/> */}
-                        <div className='col s6 tracks-col'>
+                        <div className='col s12 m6 tracks-col'>
                             <img src='https://www.youtube.com/yt/about/media/images/brand-resources/logos/YouTube-logo-full_color_light.svg'
-                                width={200}
+                                width={150}
                                 style={{margin:15}}
                             />
                         {/* <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700}> */}
-                            { this.state.youtubeResults.map((video) => <Video key={video.id.videoId} info={video} onClick={this.onYoutubeClick}/> )}
+                            { this.state.youtubeResults.map((video) => <Video isCurrent={isCurrent(video)} key={video.id.videoId} info={video} onClick={this.onYoutubeClick}/> )}
                         {/* </ReactCSSTransitionGroup>  */}
                         </div>
                         
