@@ -86,6 +86,8 @@ input {
 .login-avatar{
     width: 60px !important;
     height: 60px !important;
+    cursor: pointer;
+    margin-top: 20px;
 }
 
 .player-counter{

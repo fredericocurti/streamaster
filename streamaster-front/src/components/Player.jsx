@@ -10,10 +10,6 @@ import moment from 'moment'
 import ReactTooltip from 'react-tooltip'
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 
-
-require("moment-duration-format");
-
-
 class Player extends Component{
     constructor(props){
       super(props)
@@ -228,7 +224,7 @@ class Player extends Component{
                 tooltipStyles={{ top : -100 }}                
                 tooltip={
                   <Slider 
-                    style={{height: 100, paddingBottom : 20 }} 
+                    style={{height: 100, paddingBottom : 20}} 
                     axis="y" 
                     value={this.state.volume}
                     onChange={(ev,val) => { this.setState({ volume : val })}}

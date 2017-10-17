@@ -37,6 +37,7 @@ class Main extends Component {
         spotify.authenticate((status) => {
             console.log('Auth status : ' + status)
         })
+        auth.unsubscribe()
     }
 
     componentDidMount(){
@@ -146,6 +147,7 @@ class Main extends Component {
                         src={ auth.getUser().image }
                         size={30}
                         className='user-avatar'
+                        onClick={ () => { auth.logout() } }
                     />
                 </span>
 

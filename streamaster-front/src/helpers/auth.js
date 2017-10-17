@@ -6,7 +6,8 @@ import {omit} from 'lodash'
 const emitter = new EventEmitter();
 emitter.setMaxListeners(20)
 
-const baseUrl = 'http://localhost:8080/'
+// const baseUrl = 'http://localhost:8080/'
+const baseUrl = 'http://10.92.44.177:8080/'
 
 var user = { 
     email : null,
@@ -15,32 +16,36 @@ var user = {
 }
 
 export default window.auth = {
-    login : (email,password,callback) => {
+    login : function(email,password,callback){
         console.log('Logging in with',email,password)
         var fd = new FormData();
         fd.append('email',email)
         fd.append('password',password)
-
         fetch(baseUrl + 'login', {
             method: 'POST',
             body : fd
         }).then((response) => {
             var data = response.json().then((data) => {
+                console.log(data)
                 if (data.status == 200) {
                     user = omit(data,['status'])           
                     console.log( '[Auth] Auth Successful',data)
                     localStorage.setItem('user',JSON.stringify(user))
+                    emitter.emit('auth',user)
                 } else {
                     console.log('[Auth] Auth failed,error ' + data.status)
                 }
             callback(data)
-            emitter.emit('auth',user)
             })
         })
     },
 
     subscribe : (callback) => {
         emitter.addListener('auth',callback)
+    },
+
+    unsubscribe : () => {
+        emitter.removeAllListeners('auth')
     },
 
     getSavedUser : (callback) => {
@@ -70,9 +75,17 @@ export default window.auth = {
             body : fd
         }).then((response) => {
             response.json().then((data) => {
-                console.log(data)
+                console.log('ALO ',data)
+                if (data.status == 200) {
+                    user = omit(data,['status'])
+                    localStorage.setItem('user',JSON.stringify(user))
+                    emitter.emit('auth',user)
+                    callback(data)
+                } else {
+                    callback(data)
+                }
             })
-                callback("eae")
+                
         })
     },
 

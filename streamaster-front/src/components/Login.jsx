@@ -17,7 +17,7 @@ class Login extends Component {
             error : '',
             dialogState : 'login',
             imageFile : null,
-            imageBlob : null,
+            imageBlob : 'https://www.colorado.edu/ocg/sites/default/files/styles/small/public/people/person-placeholder_34.jpg?itok=XHQXiJa4',
             textFields : {
               email : '',
               password : '',
@@ -26,7 +26,7 @@ class Login extends Component {
           }
     }
 
-handleOpen = () => {
+  handleOpen = () => {
     this.setState({open: true})
   }
 
@@ -42,22 +42,20 @@ handleOpen = () => {
   }
 
   handleLogin = () => {
-    auth.login(this.state.textFields.email,this.state.textFields.password,(result) => {
-      if (result.status == 401){
-        this.setState({ error : "Senha incorreta. Verifique sua senha e tente novamente"})
-      } else if (result.status == 404){
-        this.setState({ error : "Usuário não encontrado. Verifique se essa conta está registrada"})
-      } else if (result.status == 200){
-        this.setState({ open : false, auth : auth.getUser()})
-      }
-    })
+    if (this.state.textFields.email != '' && this.state.textFields.password != '') {
+      auth.login(this.state.textFields.email,this.state.textFields.password,(result) => {
+        if (result.status == 401) {
+          this.setState({ error : "Senha incorreta. Verifique sua senha e tente novamente"})
+        } else if (result.status == 404) {
+          this.setState({ error : "Usuário não encontrado. Verifique se essa conta está registrada"})
+        }
+      })
+    }
   }
 
   handleRegister = () => {
     auth.register(this.state.textFields.email,this.state.textFields.userName,this.state.textFields.password,this.state.imageBlob, (result) => {
-      if (result.status == "SUCCESS"){
-        this.setState({ open : false, auth : auth.getUser() })
-      } else if (result.status == "FAILURE"){
+      if (result.status == 409){
         this.setState({ error : "Ocorreu um problema. Provavelmente um usuário com essas credenciais já existe"})
       }
     })
