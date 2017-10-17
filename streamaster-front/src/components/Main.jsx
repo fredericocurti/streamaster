@@ -13,6 +13,7 @@ import Player from './Player'
 
 import spotify from '../helpers/spotify.js'
 import youtube from '../helpers/youtube.js'
+import auth from '../helpers/auth.js'
 
 import spotifyLogo from '../assets/spotify-logo.png'
 
@@ -140,9 +141,9 @@ class Main extends Component {
                 }
 
                 <span className='user-info valign-wrapper'>
-                    <span className='user-email'> nome.da.ferinha@gmail.com </span>
+                    <span className='user-email'> { auth.getUser().userName } </span>
                     <Avatar
-                        src=""
+                        src={ auth.getUser().image }
                         size={30}
                         className='user-avatar'
                     />

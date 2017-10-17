@@ -24,6 +24,11 @@ class App extends Component {
     auth.getSavedUser((user) => {
       this.setState({ auth : user })
     })
+
+    auth.subscribe((user) => {
+      this.setState({ auth : user })
+    })
+
   }
   
   componentDidMount(){    

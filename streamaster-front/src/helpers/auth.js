@@ -2,17 +2,16 @@
 
 import store from './store'
 import {EventEmitter} from 'events'
-
+import {omit} from 'lodash'
 const emitter = new EventEmitter();
 emitter.setMaxListeners(20)
 
 const baseUrl = 'http://localhost:8080/'
 
 var user = { 
-    id : null ,
     email : null,
-    username : null,
-    password : null
+    userName : null,
+    image : null
 }
 
 export default window.auth = {
@@ -28,15 +27,20 @@ export default window.auth = {
         }).then((response) => {
             var data = response.json().then((data) => {
                 if (data.status == 200) {
+                    user = omit(data,['status'])           
                     console.log( '[Auth] Auth Successful',data)
-                    localStorage.setItem('user',JSON.stringify(data.payload))
-                    user = data.payload
+                    localStorage.setItem('user',JSON.stringify(user))
                 } else {
                     console.log('[Auth] Auth failed,error ' + data.status)
                 }
             callback(data)
+            emitter.emit('auth',user)
             })
         })
+    },
+
+    subscribe : (callback) => {
+        emitter.addListener('auth',callback)
     },
 
     getSavedUser : (callback) => {
@@ -45,6 +49,7 @@ export default window.auth = {
             user = JSON.parse(localStorageUser)
             console.log('[Auth] Retreived user from last session',user)
             callback(user)
+            emitter.emit('auth',user)
         }
     },
 
