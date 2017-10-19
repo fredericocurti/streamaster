@@ -37,7 +37,7 @@ class Player extends Component{
     componentWillReceiveProps(nextProps){
       if (this.props.info.currentSource != nextProps.info.currentSource) {
         console.log('[Player] Switched source to ' + nextProps.info.currentSource)
-        this.setState({ slider : 0 })
+        this.setState({ slider : 0, playing : false })
 
         if (nextProps.info.currentSource == 'youtube') {
           spotify.pause()
@@ -49,7 +49,6 @@ class Player extends Component{
             this.setState({ slider: 0.0, playing : true })
           })
         }
-
       }
 
       if (this.props.info.currentSource == 'spotify') {
@@ -89,7 +88,9 @@ class Player extends Component{
           this.setState({ slider: current });
         }
       } else if (this.props.info.currentSource == 'youtube'){
-        this.setState({ slider : this.youtubePlayer().getCurrentTime() })
+        if (this.state.dragging == false){
+          this.setState({ slider : this.youtubePlayer().getCurrentTime() })          
+        }
       }
     }
 
@@ -118,7 +119,7 @@ class Player extends Component{
       if (this.props.info.currentSource == 'spotify'){
         spotify.setVolume(this.state.volume * 100)
       } else if (this.props.info.currentSource == 'youtube'){
-        this.youtubePlayer().setVolume(this.state.volume * 100)
+        this.youtubePlayer().setVolume(parseInt(this.state.volume * 100))
       }
     
     }

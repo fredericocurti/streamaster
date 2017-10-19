@@ -5,7 +5,8 @@
 }
 
 .user-avatar {
-
+    margin: 10px;
+    cursor: pointer;
 }
 
 .user-email {

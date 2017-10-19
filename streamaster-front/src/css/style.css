@@ -246,7 +246,8 @@ input {
 
 .react-draggable{
   max-width: 210px;
-  position: fixed; 
+  position: fixed;
+  z-index: 0 !important;
 }
 
 /* .handle{

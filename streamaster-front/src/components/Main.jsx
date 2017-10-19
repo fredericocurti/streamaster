@@ -3,7 +3,7 @@ import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
 import YouTube from 'react-youtube'
-import { Avatar,Card } from 'material-ui'
+import { Avatar,Card,FlatButton,Popover,Menu,MenuItem,Divider } from 'material-ui'
 import '../css/main.css'
 import SearchBar from './SearchBar'
 import Slider from './Slider'
@@ -29,7 +29,9 @@ class Main extends Component {
             currentVideo : null, 
             currentTrack : null,
             youtubePlayer : null,
-            youtubePicked : false
+            youtubePicked : false,
+            open: false,
+            anchorEl: null
         }
     }
 
@@ -70,13 +72,25 @@ class Main extends Component {
     }
  
     onYouTubeStateChange = (event) => {
-        console.log(event.target)
     }
 
     onYouTubeReady = (event) => {
         // O objeto this.state.youtubePlayer só irá existir        
         event.target.a.style.pointerEvents = 'none'
         this.setState({ currentSource : 'youtube' , youtubePlayer : event.target })
+    }
+    
+    handleTouchTap = (event) => {
+        this.setState({
+            open: true,
+            anchorEl: event.currentTarget,
+        })
+    }
+
+    handleRequestClose = () => {
+        this.setState({
+            open : false
+        })
     }
 
     render() {
@@ -120,7 +134,7 @@ class Main extends Component {
                         handle=".handle"
                         defaultPosition={{x: window.innerWidth - 250, y: window.innerHeight - 300}}
                         position={null}
-                        grid={[25, 25]}
+                        grid={[25, 50]}
                         bounds='parent'
                     >
                         
@@ -145,11 +159,29 @@ class Main extends Component {
                     <span className='user-email'> { auth.getUser().userName } </span>
                     <Avatar
                         src={ auth.getUser().image }
-                        size={30}
+                        size={50}
                         className='user-avatar'
-                        onClick={ () => { auth.logout() } }
+                        onClick={this.handleTouchTap}
                     />
+                    <Popover
+                        open={this.state.open}
+                        anchorEl={this.state.anchorEl}
+                        anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+                        targetOrigin={{horizontal: 'middle', vertical: 'top'}}
+                        onRequestClose={this.handleRequestClose}
+                    >
+                        <Menu>
+                            <MenuItem 
+                                disabled 
+                                primaryText={ <div style={{fontSize: 14}}>{auth.getUser().email}</div> }/>
+                            <Divider/>
+                            <MenuItem primaryText="Sair" onClick={auth.logout}/>
+                        </Menu>
+                    </Popover>                            
                 </span>
+
+               
+
 
                 <SearchBar
                     onChange={(text) => {
@@ -164,7 +196,7 @@ class Main extends Component {
                 ?   <div className='row container tracks-container'>
                         <div className='col s12 m6 tracks-col'>
                         
-                            <img src={spotifyLogo} width={150}/>
+                            <img src={spotifyLogo} width={150} style={{margin:5}}/>
                             {/* <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700}> */}
                             { this.state.spotifyResults.map((track) => <Track isCurrent={isCurrent(track)} key={track.id} track={track} onClick={this.onSpotifyClick} /> )}
                             {/* </ReactCSSTransitionGroup> */}
@@ -176,7 +208,7 @@ class Main extends Component {
                                 style={{margin:15}}
                             />
                         {/* <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700}> */}
-                            { this.state.youtubeResults.map((video) => <Video isCurrent={isCurrent(video)} key={video.id.videoId} info={video} onClick={this.onYoutubeClick}/> )}
+                            { this.state.youtubeResults.map((video) => <Video key={video.id.videoId} isCurrent={isCurrent(video)}  info={video} onClick={this.onYoutubeClick}/> )}
                         {/* </ReactCSSTransitionGroup>  */}
                         </div>
                         
