@@ -1,10 +1,12 @@
 import React, { Component } from 'react'
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import '../css/main.css'
 
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
 import YouTube from 'react-youtube'
+import { debounce } from 'lodash'
+
 import { Avatar,Card,FlatButton,Popover,Menu,MenuItem,Divider } from 'material-ui'
-import '../css/main.css'
 import SearchBar from './SearchBar'
 import Slider from './Slider'
 import Track from './Track'
@@ -43,7 +45,7 @@ class Main extends Component {
     }
 
     componentDidMount(){
-        console.log(this.youtubePlayer)
+        this.delayedSearch = debounce(this.onSearchSubmit,750)        
         this.setState({ youtubePlayer : this.youtubePlayer })
     }
 
@@ -51,16 +53,19 @@ class Main extends Component {
         if (this.state.search != this.state.lastSearch && this.state.search != '') {
 
             spotify.searchTracks(this.state.search,(songs) => {
-                console.log(songs.tracks.items)
                 this.setState({ spotifyResults : songs.tracks.items })
             })
             
             youtube.searchVideos(this.state.search,(videos) => {
-                console.log(videos)
                 this.setState({ youtubeResults : videos.items })
             })
             this.setState({lastSearch : this.state.search})
         }
+    }
+
+    onSearchChange = (text) => {
+        this.setState({search : text})
+        this.delayedSearch()        
     }
 
     onYoutubeClick = (video) => {
@@ -184,9 +189,7 @@ class Main extends Component {
 
 
                 <SearchBar
-                    onChange={(text) => {
-                        this.setState({search : text})
-                    }}
+                    onChange={this.onSearchChange}
                     onSubmit={this.onSearchSubmit}
                 />
                 

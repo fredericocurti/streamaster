@@ -89,7 +89,7 @@ class Player extends Component{
         }
       } else if (this.props.info.currentSource == 'youtube'){
         if (this.state.dragging == false){
-          this.setState({ slider : this.youtubePlayer().getCurrentTime() })          
+          this.setState({ slider : this.youtubePlayer().getCurrentTime() })
         }
       }
     }
