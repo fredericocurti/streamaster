@@ -104,3 +104,9 @@ input {
 .player-slider {
 
 }
+
+@media (max-width: 600px) {
+  .search-wrapper {
+    transform: scale(1) !important;
+   }
+}

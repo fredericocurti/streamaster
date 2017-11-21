@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "public": "streamaster-front/build",
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

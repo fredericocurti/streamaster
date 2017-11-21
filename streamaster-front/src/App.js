@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Route } from 'react-router-dom'
 import './css/App.css';
 import './css/materialize.css'
 import './css/style.css'
-import store from './helpers/store'
 import auth from './helpers/auth'
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import _ from 'lodash'
@@ -16,7 +15,7 @@ class App extends Component {
   constructor(props){
     super(props);
     this.state = {
-      auth : null,
+      auth : true,
     }
   }
 

@@ -1,7 +1,9 @@
+import keys from './config'
+
 var spotifyConfig = {
   token : '',
-  redirect_uri : 'http://localhost:3000/callback',
-  client_id : 'c9f088d430254819b8e3411810c03320',
+  redirect_uri : `${window.location.origin}/callback`,
+  client_id : keys.spotifyClientId,
 }
 
 export default window.spotify = {
@@ -47,6 +49,7 @@ export default window.spotify = {
 
     const urlParams = new URLSearchParams(Object.entries(params))
     let url = 'https://accounts.spotify.com/authorize/?' + urlParams
+    
     // waits for callback popup to set its new obtained token
     window.addEventListener('storage', (e) => {  
       spotifyConfig.token = localStorage.getItem('spotify_access_token')
@@ -56,7 +59,7 @@ export default window.spotify = {
       }
     })
 
-    let spotifyLoginWindow = window.open(url,'',"height=600,width=500")
+    window.location.replace(url)
     
   },
 
@@ -184,23 +187,6 @@ setVolume : function(volume){
         }
     })
 },
-
-//currently_playing : function(){
-//    let request = { 
-//      method : 'GET',
-//      headers : {
-//          'Authorization' : 'Bearer ' + this.getToken(),
-//          'Content-Type' : 'application/json',
-//      },
-//  }
-//
-//  fetch('https://api.spotify.com/v1/me/player/currently-playing',request).then((res) => {
-//    let data= res.json("position_ms");
-//    console.log("Debug, ", )
-//    return res
-//  })
-//},
-
 
 resume : function(){
     let request = {

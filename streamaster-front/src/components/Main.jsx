@@ -6,15 +6,17 @@ import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same ti
 import YouTube from 'react-youtube'
 import { debounce } from 'lodash'
 
-import { Avatar,Card,FlatButton,Popover,Menu,MenuItem,Divider } from 'material-ui'
+import { Avatar,Card,FlatButton,Popover,Menu,MenuItem,Divider,CircularProgress } from 'material-ui'
 import SearchBar from './SearchBar'
 import Slider from './Slider'
 import Track from './Track'
+import SoundcloudTrack from './SoundcloudTrack'
 import Video from './Video'
 import Player from './Player'
 
 import spotify from '../helpers/spotify.js'
 import youtube from '../helpers/youtube.js'
+import soundcloud from '../helpers/soundcloud'
 import auth from '../helpers/auth.js'
 
 import spotifyLogo from '../assets/spotify-logo.png'
@@ -27,19 +29,24 @@ class Main extends Component {
             lastSearch : '',
             spotifyResults : [],
             youtubeResults : [],
+            soundcloudResults : [],
             currentSource : '',
             currentVideo : null, 
             currentTrack : null,
             youtubePlayer : null,
             youtubePicked : false,
             open: false,
-            anchorEl: null
+            anchorEl: null,
+            spotifyReady: false
         }
     }
 
     componentWillMount() {
         spotify.authenticate((status) => {
             console.log('Auth status : ' + status)
+            if (status == 'OK'){
+                this.setState({ spotifyReady : true })
+            }
         })
         auth.unsubscribe()
     }
@@ -59,6 +66,11 @@ class Main extends Component {
             youtube.searchVideos(this.state.search,(videos) => {
                 this.setState({ youtubeResults : videos.items })
             })
+
+            soundcloud.searchTracks(this.state.search,(songs) => {
+                this.setState({ soundcloudResults : songs })
+            })
+
             this.setState({lastSearch : this.state.search})
         }
     }
@@ -73,9 +85,21 @@ class Main extends Component {
     }
 
     onSpotifyClick = (track) => {
-        this.setState({currentTrack : track , currentSource : 'spotify', youtubePicked : false })
+        this.setState({
+            currentTrack : track ,
+            currentSource : 'spotify',
+            youtubePicked : false
+        })
     }
  
+    onSoundcloudClick = (track) => {
+        this.setState({
+            currentSoundcloudTrack : track, 
+            currentSource : 'soundcloud', 
+            youtubePicked : false 
+        })
+    }
+
     onYouTubeStateChange = (event) => {
     }
 
@@ -128,6 +152,12 @@ class Main extends Component {
                 } else {
                     return false
                 }
+            } else if ( this.state.currentSource == 'soundcloud') {
+                if (media == this.state.currentSoundcloudTrack){
+                    return true
+                } else {
+                    return false
+                }
             }
         }
 
@@ -160,7 +190,7 @@ class Main extends Component {
                 :  null
                 }
 
-                <span className='user-info valign-wrapper'>
+                {/* <span className='user-info valign-wrapper'>
                     <span className='user-email'> { auth.getUser().userName } </span>
                     <Avatar
                         src={ auth.getUser().image }
@@ -183,21 +213,36 @@ class Main extends Component {
                             <MenuItem primaryText="Sair" onClick={auth.logout}/>
                         </Menu>
                     </Popover>                            
-                </span>
+                </span> */}
 
                
 
-
-                <SearchBar
+                { this.state.spotifyReady 
+                ? <SearchBar
                     onChange={this.onSearchChange}
                     onSubmit={this.onSearchSubmit}
                 />
+                : <div                    
+                    style={{
+                        position: 'fixed',
+                        top : window.innerHeight/2 - 60,
+                        left : window.innerWidth/2 - 60
+                    }}
+                >
+                    <CircularProgress 
+                        size={60}
+                        color='purple'
+                    />
+                </div>
+                
+                }
+
                 
                 
                 {/* <Slider/> */}
                 { this.state.lastSearch !== '' 
                 ?   <div className='row container tracks-container'>
-                        <div className='col s12 m6 tracks-col'>
+                        <div className='col s12 m4 tracks-col'>
                         
                             <img src={spotifyLogo} width={150} style={{margin:5}}/>
                             {/* <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700}> */}
@@ -205,7 +250,7 @@ class Main extends Component {
                             {/* </ReactCSSTransitionGroup> */}
                         </div>
                         {/* <div className='divider'/> */}
-                        <div className='col s12 m6 tracks-col'>
+                        <div className='col s12 m4 tracks-col'>
                             <img src='https://www.youtube.com/yt/about/media/images/brand-resources/logos/YouTube-logo-full_color_light.svg'
                                 width={150}
                                 style={{margin:15}}
@@ -213,6 +258,14 @@ class Main extends Component {
                         {/* <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700}> */}
                             { this.state.youtubeResults.map((video) => <Video key={video.id.videoId} isCurrent={isCurrent(video)}  info={video} onClick={this.onYoutubeClick}/> )}
                         {/* </ReactCSSTransitionGroup>  */}
+                        </div>
+
+                        <div className='col s12 m4 tracks-col'>
+                            <img src='https://vignette.wikia.nocookie.net/edm/images/6/6c/SoundCloud_logo_small.png/revision/latest?cb=20160709121011'
+                                width={200}
+                                style={{margin:'7.5px 0 0 0'}}
+                            />
+                            { this.state.soundcloudResults.map((track) => <SoundcloudTrack key={track.id} isCurrent={isCurrent(track)}  track={track} onClick={this.onSoundcloudClick}/> )}
                         </div>
                         
                     </div>

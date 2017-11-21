@@ -1,6 +1,3 @@
-// This file handles data manipulation
-
-import store from './store'
 import {EventEmitter} from 'events'
 import {omit} from 'lodash'
 const emitter = new EventEmitter();
