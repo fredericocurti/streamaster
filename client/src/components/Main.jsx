@@ -47,9 +47,9 @@ const playlists = [{
     ]
 }]
 
-for (let i = 0; i < 120; i++) {
+for (let i = 0; i < 10; i++) {
     playlists[0].songs.push({
-        title: 'aaemusica2',
+        title: 'aaemusica' + i,
         artist: 'joji'
     })
 }
@@ -209,6 +209,7 @@ class Main extends Component {
 
     onPlaylistNameChanged = (playlist, newName) => {
         // FILL WITH API
+        console.log('renaming playlist', playlist, 'to', newName)
     }
 
     onPlaylistModalClose = () => {
@@ -219,6 +220,12 @@ class Main extends Component {
 
     onPlaylistDelete = (playlists, index) => {
         // FILL WITH API
+        console.log('deleting playlist', playlists)
+    }
+
+    onSongDelete = (playlist, song) => {
+       console.log("deleting song" , song, 'on playlist', playlist)
+        // API CALL
     }
 
     render() {
@@ -314,7 +321,7 @@ class Main extends Component {
                                     <span className='playlist-delete-btn' onClick={() => {
                                         let p = [...this.state.playlists]
                                         p.splice(i, 1)
-                                        this.onPlaylistDelete(p, i)
+                                        this.onPlaylistDelete(playlist, i)
                                         this.setState({ playlists: p })
                                     }}> 
                                         ✖️ 
@@ -324,15 +331,15 @@ class Main extends Component {
                             )
                             return (
                                 <TreeView key={type + '|' + i} nodeLabel={label} defaultCollapsed={true}>
-                                    {playlist.songs.map((song) => {
+                                    {playlist.songs.map((song,si) => {
                                         const label2 = <span className="node">{song.title}</span>;
                                         return (
                                             <div className="info">
                                                 {song.title} - {song.artist}
                                                 <span className='song-delete-btn' onClick={() => {
                                                     let p = [...this.state.playlists]
-                                                    p[i].songs.splice(i, 1)
-                                                    // this.onPlaylistDelete(p, i)
+                                                    this.onSongDelete(playlist, song)
+                                                    p[i].songs.splice(si, 1)
                                                     this.setState({ playlists: p })
                                                 }}> ✖️
                                                 </span>
