@@ -1,0 +1,15 @@
+{
+  "name": "streamaster",
+  "version": "1.0.0",
+  "description": "streamaster backend service",
+  "main": "server.js",
+  "repository": "https://github.com/fredericocurti/Project-Streamaster",
+  "author": "vilela69 <frederico.vilelacurti@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "mysql": "^2.16.0",
+    "nodemon": "^1.18.4"
+  }
+}
