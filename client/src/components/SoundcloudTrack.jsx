@@ -6,7 +6,8 @@ class SoundcloudTrack extends Component {
     constructor(props){
         super(props)
         this.state = {
-            thumbnailReady : false
+            thumbnailReady : false,
+            showMenu: false
         }
     }
     
@@ -28,13 +29,34 @@ class SoundcloudTrack extends Component {
         // console.log(this.props.track.uri)
     }
 
+    onMouseOver = () => {
+        this.setState({ showMenu: true })
+    }
+
+    onMouseLeave = () => {
+        this.setState({ showMenu: false })
+    }
+
     render() {
         return (
             <span 
                 className='col s12 track z-depth-1'
                 onClick={this.onClick}
                 style={{opacity : this.state.thumbnailReady ? 1 : 0}}
+                onMouseOver={this.onMouseOver}
+                onMouseLeave={this.onMouseLeave}
             >
+                {this.state.showMenu
+                    ? <div
+                        className='more-btn'
+                        onClick={() => {
+                            this.props.onExtraClick(this.props.track, "soundcloud")
+                        }}
+                    >
+                        +
+                    </div>
+                    : null
+                }
                 <img src={this.props.track.artwork_url || 'https://png.icons8.com/?id=21619&size=280'} 
                     width={50} 
                     style={{verticalAlign : 'middle'}} 

@@ -6,7 +6,8 @@ class Video extends Component {
     constructor(props){
         super(props)
         this.state = {
-            thumbnailReady : false
+            thumbnailReady : false,
+            showMenu: false
         }
     }
 
@@ -16,7 +17,7 @@ class Video extends Component {
 
     getInfo = () => {
         let info = {}
-        let title = this.props.info.snippet.title
+        let title = this.props.info.snippet.title.toLowerCase()
         let artist = title.slice(0,title.indexOf('-'))
         let song = title.slice(title.indexOf('-') + 1 ,title.length)
         return { artist : artist , song : song }
@@ -27,6 +28,14 @@ class Video extends Component {
         // console.log(this.props.info.id.videoId)
     }
 
+    onMouseOver = () => {
+        this.setState({ showMenu: true })
+    }
+
+    onMouseLeave = () => {
+        this.setState({ showMenu: false })
+    }
+
     render() {
         const info = this.getInfo()
         return (
@@ -34,7 +43,21 @@ class Video extends Component {
                 onClick={this.onClick} 
                 className='col s12 track z-depth-1' 
                 style={{opacity : this.state.thumbnailReady ? 1 : 0}}
+                onMouseOver={this.onMouseOver}
+                onMouseLeave={this.onMouseLeave}
             >
+                {this.state.showMenu
+                    ? <div
+                        className='more-btn'
+                        onClick={() => {
+                            this.props.onExtraClick({...this.props.info}, "youtube")
+                        }}
+                    >
+                        +
+                    </div>
+                    : null
+                }
+
                 <img src={this.props.info.snippet.thumbnails.default.url} 
                     style={{
                         verticalAlign : 'middle', width : 'auto',

@@ -1,4 +1,5 @@
 import keys from './config'
+import song from './song';
 
 var spotifyConfig = {
   token : '',
@@ -7,8 +8,21 @@ var spotifyConfig = {
 }
 
 export default window.spotify = {
+  getSpotifyArtistsNames: function (info) {
+    let names = ''
+    let i = 0
+    for (i; i < info.artists.length; i++) {
+      if (i < info.artists.length - 1) {
+        names += info.artists[i].name + ', '
+      } else {
+        names += info.artists[i].name
+      }
+    }
+    return names
+  },
 
-  searchTracks : function(query,callback){
+
+  searchTracks : function(query, callback){
       let token = spotifyConfig.token
       let header = new Headers()
       header.append('Authorization',`Bearer ${token}`)
@@ -26,7 +40,19 @@ export default window.spotify = {
       fetch('https://api.spotify.com/v1/search?'+params,request)
       .then((res) => {
         if (res.status == 200) {
-          res.json().then((songs) => callback(songs))
+          res.json().then((songs) => {
+            console.log('SONGS', songs)
+            // console.log('mapped songs:', songs.tracks.items.map((s) => 
+            //   song(
+            //     'spotify',
+            //     s.name,
+            //     this.getSpotifyArtistsNames(s),
+            //     s.album.images[2],
+            //     s.album.images[1],
+            //     s.duration_ms
+            //   )))
+            callback(songs)
+          })
         } else if (res.status == 401) {
           let componentCallback = callback
           this.requestToken(() => {
@@ -37,6 +63,8 @@ export default window.spotify = {
         }
       })
   },
+
+
 
   requestToken : function(callback){
     const params = {
@@ -115,7 +143,7 @@ export default window.spotify = {
             'Content-Type' : 'application/json',
         },
         body : JSON.stringify({ 
-            "uris" : [track.uri]
+            "uris" : [track.url ||track.uri]
         })
     }
     fetch('https://api.spotify.com/v1/me/player/play',request).then((res) => {

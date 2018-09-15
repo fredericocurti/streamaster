@@ -133,6 +133,7 @@
     transition: background-color 0.1s ease;
     transition: opacity 1s ease;
     position: relative;
+    text-transform: capitalize;
 }
 
 .more-btn {
@@ -156,10 +157,10 @@
     padding: 0px;
 }
 
-.tracks-container{
+.tracks-container {
     margin-top: 150px;
     margin-bottom: 100px;
-
+    transition: transform 0.3s ease;
 }
 
 .track-title {
@@ -261,6 +262,14 @@ input {
 .info:hover {
     font-weight: bold;
     cursor: pointer;
+}
+
+.info:hover .song-delete-btn{
+    display: inline;
+}
+
+.song-delete-btn {
+    display: none;
 }
 
 .tree-view_arrow {

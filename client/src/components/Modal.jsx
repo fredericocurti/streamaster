@@ -1,7 +1,9 @@
+//@ts-check
 import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import RaisedButton from 'material-ui/RaisedButton'
 import FontIcon from 'material-ui/FontIcon'
+import song from '../helpers/song';
 
 /**
  * Dialog with action buttons. The actions are passed in as an array of React objects,
@@ -13,9 +15,85 @@ export default class Modal extends React.Component {
   constructor(props){
     super(props)
     this.state = {
-      step: 'choice' // can be choice, share or add
+      step: 'choice', // can be choice, share or add,
+      songInfo: {}
     }
   }
+
+  componentWillMount() {
+    let { info, modalSource } = this.props 
+
+    if (modalSource === 'spotify') {
+      this.songInfo = {
+        track_id: null,
+        source: modalSource,
+        url: info.uri,
+        title: info.name,
+        artist: this.getSpotifyArtistsNames(info),
+        thumbnail_url: info.album.images[2].url,
+        thumbnail_big_url: info.album.images[1].url,
+        duration_ms: info.duration_ms
+      }
+    } else if (modalSource === 'youtube') {
+      
+      let names = this.getYoutubeNames(info)
+      this.songInfo = {
+        track_id: null,
+        source: modalSource,
+        url: info.id.videoId,
+        title: names.song,
+        artist: names.artist,
+        thumbnail_url: info.snippet.thumbnails.default.url,
+        thumbnail_big_url: info.snippet.thumbnails.high.url,
+        duration_ms: null
+      }
+    } else if (modalSource === 'soundcloud') {
+      var patt = /large/i;
+      let big_thumb = info.artwork_url.replace(patt, 'crop')
+
+      this.songInfo = {
+        track_id: null,
+        source: modalSource,
+        url: info.permalink_url,
+        title: info.title,
+        artist: info.user.username,
+        thumbnail_url: info.artwork_url,
+        thumbnail_big_url: big_thumb,
+        duration_ms: info.duration
+      }
+    }
+    
+    this.setState({
+      songInfo: this.songInfo
+    })
+
+  }
+
+  getYoutubeNames(info) {
+    console.log(info)
+    let title = info.snippet.title.toLowerCase()
+    let symIndex = title.indexOf('-')
+    let artist = title.slice(0, symIndex)
+    let song = title.slice(symIndex + 1, title.length)
+    if (symIndex === -1) {
+      return { artist: '', song: title }
+    }
+    return { artist: artist, song: song }
+  }
+
+  getSpotifyArtistsNames(info) {
+  let names = ''
+  let i = 0
+  for (i; i < info.artists.length; i++) {
+    if (i < info.artists.length - 1) {
+      names += info.artists[i].name + ', '
+    } else {
+      names += info.artists[i].name
+    }
+  }
+  return names 
+}
+
 
   componentWillReceiveProps(nextProps) {
     this.setState({ step: 'choice' })
@@ -29,53 +107,24 @@ export default class Modal extends React.Component {
     this.setState({ open: false });
   };
 
-  onPlaylistSelected = (p) => {
-    console.log(p)
+  onPlaylistSelected = (playlist, playlistIndex) => {
+    this.props.onSongAddedToPlaylist(this.state.songInfo, playlist, playlistIndex)
     this.props.onModalClose()
   }
  
   
   render() {
-    let { info, modalSource } = this.props 
 
-    const getSpotifyArtistsNames = () => {
-      let names = ''
-      let i = 0
-      for (i; i < info.artists.length; i++) {
-        if (i < info.artists.length - 1) {
-          names += info.artists[i].name + ', '
-        } else {
-          names += info.artists[i].name
-        }
-      }
-      return names
-    }
-    
-    const pi = () => {
-      if (modalSource == 'spotify') {
-        return {
-          title: info.name,
-          artist: getSpotifyArtistsNames(),
-          source: modalSource,
-          thumbnailUrl: info.album.images[1].url,
-          duration: info.duration_ms
-        }
-      } else if (modalSource == 'youtube') {
-        return 
-      } else if (modalSource == 'soundcloud') {
-        return 
-      }
-    }
-
+  
     const shareIcon = <FontIcon className="material-icons">share</FontIcon>
     const addIcon = <FontIcon className="material-icons">add</FontIcon>
 
 
-    let i = pi() // parsed info
+    let i = this.state.songInfo // parsed info
 
     return (
       <div>
-        {modalSource 
+        {i.source 
         ?
           <Dialog
             title={
@@ -88,7 +137,7 @@ export default class Modal extends React.Component {
 
           {this.state.step === 'choice'
             ? <div className='modal-container'>
-                <img className='modal-img' src={i.thumbnailUrl}></img>
+                <img className='modal-img' src={i.thumbnail_big_url}></img>
                 <div className='modal-buttons'>
                   <a className='modal-button'
                     onClick={() => {
@@ -119,12 +168,11 @@ export default class Modal extends React.Component {
                       className='add-playlist-btn'
                       style={{margin: 5}}
                       onClick={() => {
-                        this.onPlaylistSelected(p)
+                        this.onPlaylistSelected(p, i)
                       }}
                       key={'p' + i}
                     > {p.name} </RaisedButton>
                     </div>
-                    
                     ))
                   : null
               }

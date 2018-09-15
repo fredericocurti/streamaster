@@ -191,7 +191,7 @@ class Main extends Component {
     } 
 
     onModalClose = () => {
-        this.setState({modalOpen: false})
+        this.setState({modalOpen: false, modalSource: null})
     }
 
     handleDrawer = () => this.setState({ drawerOpen: !this.state.drawerOpen });
@@ -204,6 +204,7 @@ class Main extends Component {
             },
             ...this.state.playlists]
         })
+        // API CALL
         
     }
 
@@ -223,9 +224,42 @@ class Main extends Component {
         console.log('deleting playlist', playlists)
     }
 
+    onTrackFinish = () => {
+        console.log("Track has finished playing!")
+    }
+
+    onPlaylistPlay = (playlist, songIndex) => {
+        console.log('playling', playlist, 'track', songIndex)
+        let media = {...playlist.songs[songIndex]}
+        console.log(media)
+        if (media.source === 'spotify') {
+            this.setState({
+                currentSource: media.source,
+                currentTrack: media,
+                youtubePicked: false
+            })
+        } else if (media.source === 'youtube') {
+            this.setState({
+                currentSource: media.source,
+                currentVideo: media,    
+                youtubePicked: true
+            })
+        } else if (media.source === 'soundcloud') {
+            this.onSoundcloudClick(media)
+        }
+    }
+
     onSongDelete = (playlist, song) => {
        console.log("deleting song" , song, 'on playlist', playlist)
         // API CALL
+    }
+
+    onSongAddedToPlaylist = (song, playlist, playlistIndex) => {
+        console.log('added song',song, 'to playlist', playlist, 'index', playlistIndex)
+        // API CALL TO STORE
+        let p = [...this.state.playlists]
+        p[playlistIndex].songs.push(song)
+        this.setState({playlists: p})
     }
 
     render() {
@@ -239,7 +273,7 @@ class Main extends Component {
 
         const getVideoId = () => {
             if (this.state.currentVideo){
-                return this.state.currentVideo.id.videoId
+                return this.state.currentVideo.url || this.state.currentVideo.id.videoId
             } else {
                 return ''
             }
@@ -276,6 +310,7 @@ class Main extends Component {
                         onModalClose={this.onModalClose} 
                         modalSource={this.state.modalSource}
                         playlists={this.state.playlists}
+                        onSongAddedToPlaylist={this.onSongAddedToPlaylist}
                     />
                     : null
                 }
@@ -313,6 +348,9 @@ class Main extends Component {
                                             }
                                         }}
                                         className="node"
+                                        onClick={() => {
+                                            this.onPlaylistPlay(playlist, 0)        
+                                        }}
                                         contentEditable={playlist.name == 'New Playlist' ? true : false}
                                     >
                                         {playlist.name}
@@ -334,7 +372,9 @@ class Main extends Component {
                                     {playlist.songs.map((song,si) => {
                                         const label2 = <span className="node">{song.title}</span>;
                                         return (
-                                            <div className="info">
+                                            <div className="info" onClick={() => {
+                                                this.onPlaylistPlay(playlist, si)
+                                            }}>
                                                 {song.title} - {song.artist}
                                                 <span className='song-delete-btn' onClick={() => {
                                                     let p = [...this.state.playlists]
@@ -463,7 +503,11 @@ class Main extends Component {
 
                 {/* <Slider/> */}
                 { this.state.lastSearch !== '' 
-                ?   <div className='row container tracks-container'>
+                    ? <div className='row container tracks-container' style={{ 
+                        transform: `translate(${this.state.drawerOpen ? 150 : 0}px, ${0}px)`,
+                        // marginLeft: this.state.drawerOpen ? 30 : null
+                    }}
+                    >
                         <div className='col s12 m4 tracks-col'>
                         
                             <img src={spotifyLogo} width={150} style={{margin:5, transition: 'opacity 0.5s ease', opacity: this.state.spotifyResults.length == 0 ? 0 : 1}}/>
@@ -478,7 +522,7 @@ class Main extends Component {
                                 style={{margin:15, transition: 'opacity 0.5s ease', opacity: this.state.youtubeResults.length == 0 ? 0 : 1}}
                             />
                         {/* <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700}> */}
-                            { this.state.youtubeResults.map((video) => <Video key={video.id.videoId} isCurrent={isCurrent(video)}  info={video} onClick={this.onYoutubeClick}/> )}
+                            { this.state.youtubeResults.map((video) => <Video key={video.id.videoId} isCurrent={isCurrent(video)}  info={video} onClick={this.onYoutubeClick} onExtraClick={this.onExtraClick}/> )}
                         {/* </ReactCSSTransitionGroup>  */}
                         </div>
 
@@ -487,7 +531,7 @@ class Main extends Component {
                                 width={200}
                                 style={{margin:'7.5px 0 0 0', transition: 'opacity 0.5s ease', opacity: this.state.soundcloudResults.length == 0 ? 0 : 1}}
                             />
-                            { this.state.soundcloudResults.map((track) => <SoundcloudTrack key={track.id} isCurrent={isCurrent(track)}  track={track} onClick={this.onSoundcloudClick}/> )}
+                            { this.state.soundcloudResults.map((track) => <SoundcloudTrack key={track.id} isCurrent={isCurrent(track)}  track={track} onClick={this.onSoundcloudClick} onExtraClick={this.onExtraClick}/> )}
                         </div>
                         
                     </div>
@@ -509,7 +553,7 @@ class Main extends Component {
                 
 
                 { this.state.currentSource !== ''
-                ? <Player info={this.state} youtubePlayer={this.state.youtubePlayer}/>
+                ? <Player onTrackFinish={this.onTrackFinish} info={this.state} youtubePlayer={this.state.youtubePlayer}/>
                 : null
                 }
                 

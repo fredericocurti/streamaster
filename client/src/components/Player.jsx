@@ -23,19 +23,28 @@ class Player extends Component{
         scPlayerReady : false,
         scPlaying : false
       } // this.slideUpdate = debounce(this.handleSlider, 500)
+
+
     }
 
 
     componentWillMount(){
       this.interval = setInterval(this.tick, 1000);
       if (this.props.info.currentSource == 'spotify') {
-        spotify.play(this.props.info.currentTrack,() => {
+        spotify.play(this.props.info.currentTrack, () => {
         })
       } else if (this.props.info.currentSource == 'youtube') {
         spotify.pause()
       } else if (this.props.info.currentSource == 'soundcloud') {
         spotify.pause()
       }
+
+      this.scPlayer = {
+        getCurrentTime: () => 0,
+        seekTo: () => 0,
+        getDuration: () => 0
+      }
+
     }
 
     componentDidMount(){
@@ -100,7 +109,7 @@ class Player extends Component{
       if (this.props.info.currentSource == 'spotify') {
         if (this.state.playing == true 
             && this.state.dragging == false
-            && this.state.slider <= this.props.info.currentTrack.duration_ms/1000 - 1) {
+            && (this.state.slider <= this.props.info.currentTrack.duration_ms/1000 - 1) ) {
           let current = this.state.slider + 1
           this.setState({ slider: current });
         }
@@ -109,12 +118,12 @@ class Player extends Component{
           this.setState({ slider : this.youtubePlayer().getCurrentTime() })
         }
       } else if (this.props.info.currentSource == 'soundcloud'){
-        if (this.state.dragging == false && this.state.scPlayerReady && this.state.scPlaying) {
-          this.setState({ slider : parseInt(this.scPlayer.getCurrentTime()) })
+        if (this.state.dragging == false) {
+          this.setState({ slider : parseInt(this.scPlayer.getCurrentTime()) || 0 })
       }
     }
     if (this.state.slider >= this.getSliderMax() - 1) {
-      console.log("ITS THE END")
+      this.props.onTrackFinish()
     }
   }
 
@@ -157,7 +166,7 @@ class Player extends Component{
       } else if (this.props.info.currentSource == 'youtube') {
         return parseInt(this.youtubePlayer().getDuration())
       } else if (this.props.info.currentSource == 'soundcloud') {
-        return parseInt(this.props.info.currentSoundcloudTrack.duration / 1000)
+        return parseInt(this.props.info.currentSoundcloudTrack.duration_ms/1000 || this.props.info.currentSoundcloudTrack.duration / 1000)
       }
     }
  
@@ -178,15 +187,15 @@ class Player extends Component{
                 names += this.props.info.currentTrack.artists[i].name
             }
         }
-        return names
+        return names 
         }
       }
 
       const getSongName = () => {
         if (this.props.info.currentSource == 'spotify') {
-          return this.props.info.currentTrack.name
+          return this.props.info.currentTrack.title || this.props.info.currentTrack.name
         } else if (this.props.info.currentSource == 'youtube') {
-          return this.props.info.currentVideo.snippet.title
+          return this.props.info.currentVideo.title || this.props.info.currentVideo.snippet.title
         } else if (this.props.info.currentSource == 'soundcloud') {
           return this.props.info.currentSoundcloudTrack.title
         }
@@ -199,8 +208,9 @@ class Player extends Component{
         } else if ( this.props.info.currentSource == 'youtube'){
           let mt = moment.utc(this.youtubePlayer().getDuration() * 1000).format('mm:ss')
           return mt
-        } else if ( this.props.info.currentSource == 'soundcloud' && this.state.scPlayerReady){
-          let mt = moment.utc(this.scPlayer.getDuration() * 1000).format('mm:ss')
+        } else if ( this.props.info.currentSource == 'soundcloud'){
+          let dur = this.scPlayer ? this.scPlayer.getDuration() : 0
+          let mt = moment.utc(dur * 1000).format('mm:ss')
           return mt
         }
       }
@@ -212,7 +222,7 @@ class Player extends Component{
         } else if ( this.props.info.currentSource == 'youtube'){
           let ct = moment.utc(this.youtubePlayer().getCurrentTime() * 1000).format('mm:ss')
           return ct              
-        } else if (this.props.info.currentSource == 'soundcloud' && this.state.scPlayerReady) {
+        } else if (this.props.info.currentSource == 'soundcloud'){
           let ct = moment.utc(this.state.slider * 1000).format('mm:ss')
           return ct              
         }
@@ -222,11 +232,11 @@ class Player extends Component{
 
       const getThumbnail = () => {
         if (this.props.info.currentSource == 'spotify') {
-          return this.props.info.currentTrack.album.images[2].url
+          return this.props.info.currentTrack.thumbnail_url || this.props.info.currentTrack.album.images[2].url
         } else if (this.props.info.currentSource == 'youtube'){
-          return this.props.info.currentVideo.snippet.thumbnails.default.url
+          return this.props.info.currentVideo.thumbnail_url || this.props.info.currentVideo.snippet.thumbnails.default.url
         } else if (this.props.info.currentSource == 'soundcloud'){
-          return this.props.info.currentSoundcloudTrack.artwork_url
+          return this.props.info.currentSoundcloudTrack.thumbnail_url || this.props.info.currentSoundcloudTrack.artwork_url
         }
       }
 
@@ -287,34 +297,54 @@ class Player extends Component{
               }
 
             </BottomNavigation>
-              <ReactPlayer
-                style={{display : 'none'}} 
-                url={
-                  this.props.info.currentSoundcloudTrack == undefined
-                  ? 'https://www.youtube.com/watch?v=_OBlgSz8sSM'
-                  : this.props.info.currentSoundcloudTrack.permalink_url 
-                }
-                playing={ this.props.info.currentSource == 'soundcloud' ? this.state.playing : null}
+
+            {this.props.info.currentSource === 'soundcloud'
+              ? <ReactPlayer
+                style={{ display: 'none' }}
+                url={this.props.info.currentSoundcloudTrack.url || this.props.info.currentSoundcloudTrack.permalink_url}
+                playing={this.state.playing}
                 volume={this.state.volume}
-                ref={(ReactPlayer) => {this.scPlayer = ReactPlayer} }
+                preload
+                config={{soundcloud: {auto_play: true, autoPlay: true}}}
+                ref={(ReactPlayer) => { this.scPlayer = ReactPlayer }}
+                onReady={() => {
+                  console.log('ready')
+                }}
                 onStart={() => {
-                  setTimeout( ()=> {
-                    this.setState({playing : true, scPlayerReady : true, scPlaying : true}), 
-                    console.log('Soundcloud started playing -start')
-                  },1500)
+                  console.log('start')
+                  // setTimeout(() => {
+                    // this.setState({ playing: true, scPlayerReady: true, scPlaying: true })
+                    // console.log('Soundcloud onStart')
+                  // }, 1500)
                 }}
-                onPlay={()=>{
-                  setTimeout( ()=> {
-                    this.setState({playing : true, scPlayerReady : true, scPlaying : true}), 
-                    console.log('Soundcloud started playing -play')
-                  },1500)
-                }}  
-                onEnded={()=> {
-                  this.setState({ playing : false, scPlaying : false, slider : 0.0})
-                  console.log('Soundcloud stopped playing - ended')                                    
+                onPlay={() => {
+                  // setTimeout(() => {
+                    // this.setState({ playing: true, scPlayerReady: true, scPlaying: true })
+                    // console.log('Soundcloud onPlay')
+                  // }, 1500)
                 }}
-                
+                onEnded={() => {
+                  // this.setState({ playing: false, scPlaying: false, slider: 0.0 })
+                  console.log('Soundcloud stopped playing - ended')
+                }}
+                onPause={() => {
+                  if(this.state.playing){
+                    console.log('pauso mas devia ta tocando!')
+                    try {
+                      document.getElementsByClassName("visualAudible__artworkOverlay g-transition-opacity")[0].click()                      
+                    } catch (error) {
+                    }
+                    console.log(this.scPlayer)
+                    // this.setState({ })
+                    // setTimeout(() => {
+
+                    // }, 500)
+                  }
+                }}
               />
+              : null
+            }
+
           </Paper>
         );
       }
