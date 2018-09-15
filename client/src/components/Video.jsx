@@ -24,7 +24,7 @@ class Video extends Component {
     }
 
     onClick = () => {
-        this.props.onClick(this.props.info)
+        this.props.onClick(this.props.info, 'search')
         // console.log(this.props.info.id.videoId)
     }
 
@@ -66,7 +66,7 @@ class Video extends Component {
                     onLoad={() => { this.setState({thumbnailReady : true})} }
                     alt="" 
                 />
-                <span style={{ color: this.props.isCurrent ? 'purple' : 'black' }}> <b>{info.song}</b> - {info.artist}</span>
+                <span style={{ color: this.props.isCurrent ? 'purple' : 'black', paddingLeft: 5 }}> <b>{info.song}</b> - {info.artist}</span>
             </span>
         )
     }

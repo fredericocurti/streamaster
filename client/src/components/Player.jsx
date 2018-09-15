@@ -49,6 +49,7 @@ class Player extends Component{
 
     componentDidMount(){
       console.log(this.reactPlayer)
+      this.marquee.setAttribute('scrollamount', '5')
     }
 
     componentWillReceiveProps(nextProps){
@@ -122,8 +123,8 @@ class Player extends Component{
           this.setState({ slider : parseInt(this.scPlayer.getCurrentTime()) || 0 })
       }
     }
-    if (this.state.slider >= this.getSliderMax() - 1) {
-      this.props.onTrackFinish()
+    if (this.state.slider >= this.getSliderMax() && this.props.info.currentSource === 'spotify') {
+        this.props.onTrackFinish()        
     }
   }
 
@@ -193,7 +194,7 @@ class Player extends Component{
 
       const getSongName = () => {
         if (this.props.info.currentSource == 'spotify') {
-          return this.props.info.currentTrack.title || this.props.info.currentTrack.name
+          return (this.props.info.currentTrack.title || this.props.info.currentTrack.name)
         } else if (this.props.info.currentSource == 'youtube') {
           return this.props.info.currentVideo.title || this.props.info.currentVideo.snippet.title
         } else if (this.props.info.currentSource == 'soundcloud') {
@@ -242,12 +243,28 @@ class Player extends Component{
 
         return (
           <Paper zDepth={1} className='player-wrapper'>
-            <BottomNavigation selectedIndex={this.state.selectedIndex}>
+            <BottomNavigation className='bottom-nav' selectedIndex={this.state.selectedIndex}>
               
               <img className='player-thumbnail' src={getThumbnail()}/>
               
               <BottomNavigationItem
-                label={getSongName()}
+                label={
+                  <marquee 
+                    ref={(marquee) => {this.marquee = marquee}}
+                    direction='left'
+                  > 
+                    <span 
+                      ref={(el) => {
+                        if (el) {
+                          let color = this.props.info.currentSource === 'spotify' ? 'lightgreen' : null
+                            || this.props.info.currentSource === 'soundcloud' ? 'orange' : null
+                            || this.props.info.currentSource === 'youtube' ? 'red' : null
+                      el.style.setProperty('color', color, 'important');
+                    }
+                  }}
+                    > ● </span>
+                    {getSongName()}
+                  </marquee>}
                 icon={this.state.playing ? playIcon : pauseIcon}
                 onClick={this.togglePlayback}
                 style={{width: 300}}
@@ -298,11 +315,15 @@ class Player extends Component{
 
             </BottomNavigation>
 
-            {this.props.info.currentSource === 'soundcloud'
-              ? <ReactPlayer
+            {/* {this.props.info.currentSource === 'soundcloud' */}
+              <ReactPlayer
                 style={{ display: 'none' }}
-                url={this.props.info.currentSoundcloudTrack.url || this.props.info.currentSoundcloudTrack.permalink_url}
-                playing={this.state.playing}
+                url={
+                  this.props.info.currentSource === 'soundcloud' 
+                    ? (this.props.info.currentSoundcloudTrack.url || this.props.info.currentSoundcloudTrack.permalink_url) 
+                    : null 
+                  }
+                playing={this.props.info.currentSource === 'soundcloud' ? this.state.playing : false}
                 volume={this.state.volume}
                 preload
                 config={{soundcloud: {auto_play: true, autoPlay: true}}}
@@ -326,6 +347,7 @@ class Player extends Component{
                 onEnded={() => {
                   // this.setState({ playing: false, scPlaying: false, slider: 0.0 })
                   console.log('Soundcloud stopped playing - ended')
+                  this.props.onTrackFinish()
                 }}
                 onPause={() => {
                   if(this.state.playing){
@@ -342,8 +364,8 @@ class Player extends Component{
                   }
                 }}
               />
-              : null
-            }
+              
+            
 
           </Paper>
         );

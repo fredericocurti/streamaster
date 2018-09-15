@@ -4,6 +4,8 @@ import Dialog from 'material-ui/Dialog';
 import RaisedButton from 'material-ui/RaisedButton'
 import FontIcon from 'material-ui/FontIcon'
 import song from '../helpers/song';
+import PlaylistModal from './PlaylistModal';
+import {capitalize} from 'lodash'
 
 /**
  * Dialog with action buttons. The actions are passed in as an array of React objects,
@@ -16,7 +18,8 @@ export default class Modal extends React.Component {
     super(props)
     this.state = {
       step: 'choice', // can be choice, share or add,
-      songInfo: {}
+      songInfo: null,
+      showImg: false
     }
   }
 
@@ -28,8 +31,8 @@ export default class Modal extends React.Component {
         track_id: null,
         source: modalSource,
         url: info.uri,
-        title: info.name,
-        artist: this.getSpotifyArtistsNames(info),
+        title: capitalize(info.name),
+        artist: capitalize(this.getSpotifyArtistsNames(info)),
         thumbnail_url: info.album.images[2].url,
         thumbnail_big_url: info.album.images[1].url,
         duration_ms: info.duration_ms
@@ -41,8 +44,8 @@ export default class Modal extends React.Component {
         track_id: null,
         source: modalSource,
         url: info.id.videoId,
-        title: names.song,
-        artist: names.artist,
+        title: capitalize(names.song),
+        artist: capitalize(names.artist),
         thumbnail_url: info.snippet.thumbnails.default.url,
         thumbnail_big_url: info.snippet.thumbnails.high.url,
         duration_ms: null
@@ -55,8 +58,8 @@ export default class Modal extends React.Component {
         track_id: null,
         source: modalSource,
         url: info.permalink_url,
-        title: info.title,
-        artist: info.user.username,
+        title: capitalize(info.title) ,
+        artist: capitalize(info.user.username),
         thumbnail_url: info.artwork_url,
         thumbnail_big_url: big_thumb,
         duration_ms: info.duration
@@ -124,7 +127,7 @@ export default class Modal extends React.Component {
 
     return (
       <div>
-        {i.source 
+        {i.source
         ?
           <Dialog
             title={
@@ -137,7 +140,9 @@ export default class Modal extends React.Component {
 
           {this.state.step === 'choice'
             ? <div className='modal-container'>
-                <img className='modal-img' src={i.thumbnail_big_url}></img>
+                <img className='modal-img' style={{opacity: this.state.showImg ? 1 : 0}} src={i.thumbnail_big_url} onLoad={() => {
+                  this.setState({showImg: true})
+                }}></img>
                 <div className='modal-buttons'>
                   <a className='modal-button'
                     onClick={() => {

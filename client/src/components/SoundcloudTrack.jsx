@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
+import placeholder from '../assets/thumb-placeholder.png'
 
 class SoundcloudTrack extends Component {
     constructor(props){
@@ -24,7 +25,7 @@ class SoundcloudTrack extends Component {
     }
     
     onClick = () => {
-        this.props.onClick(this.props.track)
+        this.props.onClick(this.props.track, 'search')
         // window.open(this.props.track.external_urls.spotify,'_blank')
         // console.log(this.props.track.uri)
     }
@@ -57,13 +58,13 @@ class SoundcloudTrack extends Component {
                     </div>
                     : null
                 }
-                <img src={this.props.track.artwork_url || 'https://png.icons8.com/?id=21619&size=280'} 
+                <img src={this.props.track.artwork_url || placeholder} 
                     width={50} 
                     style={{verticalAlign : 'middle'}} 
                     alt=""
                     onLoad={() => { this.setState({thumbnailReady : true})} }
                 />
-                <span style={{ color : this.props.isCurrent ? 'purple' : 'black' }}> <b>{this.props.track.title}</b>  </span>
+                <span style={{ color: this.props.isCurrent ? 'purple' : 'black', paddingLeft: 5 }}> <b>{this.props.track.title}</b> - {this.props.track.user.username} </span>
             </span>
         )
     }

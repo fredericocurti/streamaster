@@ -15,6 +15,7 @@ import Video from './Video'
 import Player from './Player'
 import Login from './Login'
 import Modal from './Modal'
+import User from './User'
 
 import Drawer from 'material-ui/Drawer';
 import IconButton from 'material-ui/IconButton';
@@ -31,7 +32,7 @@ import spotifyLogo from '../assets/spotify-logo.png'
 import PlaylistModal from './PlaylistModal';
 
 
-const playlists = [{
+const playlists = JSON.parse(window.localStorage.getItem('playlists')) || [{
         name: 'sup',
         songs: []
     },{
@@ -47,12 +48,30 @@ const playlists = [{
     ]
 }]
 
-for (let i = 0; i < 10; i++) {
-    playlists[0].songs.push({
-        title: 'aaemusica' + i,
-        artist: 'joji'
-    })
-}
+const users = [{
+        user_id: 2,
+        email: 'teste@teste.com',
+        username: 'jose',
+        thumbnail_url: null
+    },{
+        user_id: 2,
+        email: 'teste@teste.com',
+        username: 'batatacosta',
+        thumbnail_url: null
+    },{
+        user_id: 2,
+        email: 'teste@teste.com',
+        username: 'fred',
+        thumbnail_url: null
+    }
+]
+
+// for (let i = 0; i < 10; i++) {
+//     playlists[0].songs.push({
+//         title: 'aaemusica' + i,
+//         artist: 'joji'
+//     })
+// }
 
 
 class Main extends Component {
@@ -76,10 +95,13 @@ class Main extends Component {
             modalOpen: false,
             modalMedia: {},
             modalSource: null,
-            modalInfo: {},
+            modalInfo: null,
             drawerOpen: false,
             creatingPlaylist: false,
-            playlists: playlists
+            playlists: playlists,
+            isEmpty: true,
+            playlistIndex: -1,
+            songIndex: -1
         }
     }
 
@@ -142,24 +164,33 @@ class Main extends Component {
         this.delayedSearch()        
     }
 
-    onYoutubeClick = (video) => {
+    onYoutubeClick = (video, origin) => {
         this.setState({ currentVideo : video , youtubePicked : true })
+        if (origin && origin === 'search'){
+            this.setState({ playlistIndex: -1, songIndex: -1 })
+        }
     }
 
-    onSpotifyClick = (track) => {
+    onSpotifyClick = (track, origin) => {
         this.setState({
             currentTrack : track ,
             currentSource : 'spotify',
             youtubePicked : false
         })
+        if (origin && origin === 'search') {
+            this.setState({ playlistIndex: -1, songIndex: -1 })
+        }
     }
  
-    onSoundcloudClick = (track) => {
+    onSoundcloudClick = (track, origin) => {
         this.setState({
             currentSoundcloudTrack : track, 
             currentSource : 'soundcloud', 
             youtubePicked : false 
         })
+        if (origin && origin === 'search') {
+            this.setState({ playlistIndex: -1, songIndex: -1 })
+        }
     }
 
     onYouTubeStateChange = (event) => {
@@ -203,6 +234,8 @@ class Main extends Component {
                 songs: []
             },
             ...this.state.playlists]
+        }, () => {
+            window.localStorage.setItem('playlists', JSON.stringify(this.state.playlists))
         })
         // API CALL
         
@@ -211,6 +244,7 @@ class Main extends Component {
     onPlaylistNameChanged = (playlist, newName) => {
         // FILL WITH API
         console.log('renaming playlist', playlist, 'to', newName)
+        window.localStorage.setItem('playlists', JSON.stringify(this.state.playlists))
     }
 
     onPlaylistModalClose = () => {
@@ -222,16 +256,31 @@ class Main extends Component {
     onPlaylistDelete = (playlists, index) => {
         // FILL WITH API
         console.log('deleting playlist', playlists)
+        window.localStorage.setItem('playlists', JSON.stringify(this.state.playlists))
     }
 
     onTrackFinish = () => {
+        let { playlists, playlistIndex, songIndex } = this.state
         console.log("Track has finished playing!")
+        if (playlistIndex === -1 || songIndex === -1) {
+            return
+        }
+
+        let nextTrack = playlists[playlistIndex].songs[songIndex + 1]
+        if (nextTrack) {
+            this.onPlaylistPlay(playlists[playlistIndex], songIndex + 1, playlistIndex)
+        } else {
+            this.onPlaylistPlay(playlists[playlistIndex], 0, playlistIndex)
+        }
+
     }
 
-    onPlaylistPlay = (playlist, songIndex) => {
+    // Ao tocar track da playlist
+    onPlaylistPlay = (playlist, songIndex, playlistIndex) => {
         console.log('playling', playlist, 'track', songIndex)
         let media = {...playlist.songs[songIndex]}
         console.log(media)
+
         if (media.source === 'spotify') {
             this.setState({
                 currentSource: media.source,
@@ -239,14 +288,15 @@ class Main extends Component {
                 youtubePicked: false
             })
         } else if (media.source === 'youtube') {
-            this.setState({
-                currentSource: media.source,
-                currentVideo: media,    
-                youtubePicked: true
-            })
+            this.onYoutubeClick(media)
         } else if (media.source === 'soundcloud') {
             this.onSoundcloudClick(media)
         }
+
+        this.setState({
+            playlistIndex: playlistIndex,
+            songIndex: songIndex
+        })
     }
 
     onSongDelete = (playlist, song) => {
@@ -259,7 +309,9 @@ class Main extends Component {
         // API CALL TO STORE
         let p = [...this.state.playlists]
         p[playlistIndex].songs.push(song)
-        this.setState({playlists: p})
+        this.setState({playlists: p}, () => {
+            window.localStorage.setItem('playlists', JSON.stringify(this.state.playlists))
+        })
     }
 
     render() {
@@ -301,6 +353,14 @@ class Main extends Component {
             }
         }
 
+        let { soundcloudResults, youtubeResults, spotifyResults } = this.state
+        let isempty = true
+        if (soundcloudResults.length === 0 && youtubeResults.length === 0 && spotifyResults.length === 0) {
+            isempty = true
+        } else {
+            isempty = false
+        }
+
         return (
             <div>
                 { this.state.modalSource !== null 
@@ -322,7 +382,7 @@ class Main extends Component {
 
                 <div>
 
-                    <Drawer width={250} open={this.state.drawerOpen} >
+                    <Drawer width={350} open={this.state.drawerOpen} >
                         <div className='playlist-title-bar'> 
                             <span style={{cursor: 'pointer'}} onClick={() => {
                                 this.handleDrawer()
@@ -331,7 +391,7 @@ class Main extends Component {
                         </div>
                         <FlatButton className='add-playlist-btn' onClick={this.onCreatePlaylist}> Create playlist + </FlatButton>                    
 
-                        {this.state.playlists.map((playlist, i) => {
+                        {this.state.playlists.map((playlist, playlistIndex) => {
                             const type = playlist.title;
                             const label = (
                                 <span>
@@ -341,7 +401,7 @@ class Main extends Component {
                                                 e.preventDefault()
                                                 let p = [...this.state.playlists]
                                                 let nt = e.nativeEvent.target
-                                                p[i].name = nt.innerText
+                                                p[playlistIndex].name = nt.innerText
                                                 this.setState({ playlists: p })
                                                 nt.blur()
                                                 this.onPlaylistNameChanged(playlist, nt.innerText)
@@ -349,7 +409,7 @@ class Main extends Component {
                                         }}
                                         className="node"
                                         onClick={() => {
-                                            this.onPlaylistPlay(playlist, 0)        
+                                            this.onPlaylistPlay(playlist, 0, playlistIndex)        
                                         }}
                                         contentEditable={playlist.name == 'New Playlist' ? true : false}
                                     >
@@ -358,8 +418,8 @@ class Main extends Component {
                                     
                                     <span className='playlist-delete-btn' onClick={() => {
                                         let p = [...this.state.playlists]
-                                        p.splice(i, 1)
-                                        this.onPlaylistDelete(playlist, i)
+                                        p.splice(playlistIndex, 1)
+                                        this.onPlaylistDelete(playlist, playlistIndex)
                                         this.setState({ playlists: p })
                                     }}> 
                                         ✖️ 
@@ -368,18 +428,34 @@ class Main extends Component {
                     
                             )
                             return (
-                                <TreeView key={type + '|' + i} nodeLabel={label} defaultCollapsed={true}>
+                                <TreeView key={type + '|' + playlistIndex} nodeLabel={label} defaultCollapsed={true}>
                                     {playlist.songs.map((song,si) => {
                                         const label2 = <span className="node">{song.title}</span>;
                                         return (
                                             <div className="info" onClick={() => {
-                                                this.onPlaylistPlay(playlist, si)
+                                                this.onPlaylistPlay(playlist, si, playlistIndex)
                                             }}>
-                                                {song.title} - {song.artist}
+                                                <span className='playlist-song-name' style={{ fontWeight: this.state.playlistIndex === playlistIndex && this.state.songIndex === si ? 'bold' : null}}>
+                                                    {this.state.playlistIndex === playlistIndex && this.state.songIndex === si 
+                                                        ? <span className='pointer' style={{
+                                                            color:
+                                                                song.source === 'spotify' ? 'lightgreen' : null
+                                                                    || song.source === 'soundcloud' ? 'orange' : null
+                                                                        || song.source === 'youtube' ? 'red' : null
+                                                        }}>▶</span> 
+                                                        : <span className='rotating-ball' style={{
+                                                            color:
+                                                                song.source === 'spotify' ? 'lightgreen' : null
+                                                                    || song.source === 'soundcloud' ? 'orange' : null
+                                                                        || song.source === 'youtube' ? 'red' : null
+                                                        }}> ● </span>
+                                                    }
+                                                    {' '} {song.title} - {song.artist}
+                                                </span>
                                                 <span className='song-delete-btn' onClick={() => {
                                                     let p = [...this.state.playlists]
                                                     this.onSongDelete(playlist, song)
-                                                    p[i].songs.splice(si, 1)
+                                                    p[playlistIndex].songs.splice(si, 1)
                                                     this.setState({ playlists: p })
                                                 }}> ✖️
                                                 </span>
@@ -414,6 +490,9 @@ class Main extends Component {
                                 onStateChange={this.onYouTubeStateChange}
                                 ref={(YouTube) => { this.youtubePlayer = YouTube }}
                                 onReady={this.onYouTubeReady}
+                                onEnd={() => {
+                                    this.onTrackFinish()
+                                }}
                             />
                             </div>         
                         </Card>
@@ -483,6 +562,7 @@ class Main extends Component {
                 ? <SearchBar
                     onChange={this.onSearchChange}
                     onSubmit={this.onSearchSubmit}
+                    isEmpty={isempty}
                 />
                 : <div                    
                     style={{
@@ -499,8 +579,20 @@ class Main extends Component {
                 
                 }
 
-
-
+                {/*  USER SEARCH RESULTS  */}
+                <div 
+                    className='row container users-container' 
+                    style={{
+                        transform: `translate(${this.state.drawerOpen ? 150 : 0}px, ${0}px)`,
+                        display: 'flex'
+                    }}
+                >
+                    { users.length != 0
+                        ? users.map((user, index) => <User user={user} ></User>)
+                        : null
+                    }
+                </div>
+    
                 {/* <Slider/> */}
                 { this.state.lastSearch !== '' 
                     ? <div className='row container tracks-container' style={{ 
@@ -538,19 +630,7 @@ class Main extends Component {
                 :   null    
                 }
                     
-                
-                <div className='row container tracks-container'>
-                    <div className='col s6 m4 tracks-col'>
-                        <img src='https://www.youtube.com/yt/about/media/images/brand-resources/logos/YouTube-logo-full_color_light.svg'
-                            width={150}
-                            style={{ margin: 15, transition: 'opacity 0.5s ease', opacity: this.state.youtubeResults.length == 0 ? 0 : 1 }}
-                        />
-                        {/* <ReactCSSTransitionGroup transitionName="example" transitionEnterTimeout={1000} transitionLeaveTimeout={700}> */}
-                        {this.state.youtubeResults.map((video) => <Video key={video.id.videoId} isCurrent={isCurrent(video)} info={video} onClick={this.onYoutubeClick} />)}
-                        {/* </ReactCSSTransitionGroup>  */}
-                    </div>
-                </div>
-                
+                            
 
                 { this.state.currentSource !== ''
                 ? <Player onTrackFinish={this.onTrackFinish} info={this.state} youtubePlayer={this.state.youtubePlayer}/>

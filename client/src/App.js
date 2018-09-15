@@ -10,6 +10,7 @@ import _ from 'lodash'
 import Main from './components/Main.jsx'
 import Login from './components/Login.jsx'
 import SpotifyAuth from './components/SpotifyAuth.jsx'
+import { getMuiTheme } from 'material-ui/styles';
 
 class App extends Component {
   constructor(props){
@@ -26,9 +27,17 @@ class App extends Component {
   render() {
     const actions = []
 
+    const muiTheme = getMuiTheme({
+      slider: {
+        selectionColor: 'darksalmon',
+        handleFillColor: 'darksalmon',
+        rippleColor: 'salmon'
+      }
+    })
+
     return (
       <Router>
-      <MuiThemeProvider>
+      <MuiThemeProvider muiTheme={muiTheme}>
         <div>
             <Route exact path='/' component={Main}/>
             <Route path='/callback' component={SpotifyAuth}/>

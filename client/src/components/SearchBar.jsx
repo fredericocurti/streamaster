@@ -5,16 +5,20 @@ class SearchBar extends Component {
     constructor(props){
         super(props)
         this.state = {
-            used : false
+            used : false,
         }
     }
 
     onSearchChange = (e) => {
         this.props.onChange(e.target.value)
         if (!this.state.user) {
-            setTimeout(() => this.setState({  used : true }),750)
+            setTimeout(() => this.setState({  used : true }), 500)
         }
-    } 
+    
+        
+            // this.setState({ used: true })
+        
+    }
 
     render() {
         return (

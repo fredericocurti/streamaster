@@ -30,7 +30,7 @@ class Track extends Component {
     }
 
     onClick = () => {
-        this.props.onClick(this.props.track)
+        this.props.onClick(this.props.track, 'search')
         // window.open(this.props.track.external_urls.spotify,'_blank')
         // console.log(this.props.track.uri)
     }
