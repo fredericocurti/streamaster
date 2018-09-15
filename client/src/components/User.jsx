@@ -37,7 +37,7 @@ class User extends Component {
     let {user} = this.props
 
     return (
-      <span className='user-container'>
+      <span className='user-container col m2 l2 s6'>
         <span className='user-badge'>
           <img
             src={placeholder}

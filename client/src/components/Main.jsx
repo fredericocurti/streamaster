@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import '../css/main.css'
+import favicon from '../assets/favicon.png'
 
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
 import YouTube from 'react-youtube'
@@ -580,18 +581,26 @@ class Main extends Component {
                 }
 
                 {/*  USER SEARCH RESULTS  */}
-                <div 
-                    className='row container users-container' 
-                    style={{
-                        transform: `translate(${this.state.drawerOpen ? 150 : 0}px, ${0}px)`,
-                        display: 'flex'
-                    }}
-                >
-                    { users.length != 0
-                        ? users.map((user, index) => <User user={user} ></User>)
-                        : null
-                    }
-                </div>
+                <section className='row container users-container' style={{marginTop: 120}}>
+                    <div className='streamaster-badge'>
+                        <img src={favicon} width={50} height={50}></img>
+                        <span> Streamaster </span>
+                    </div>
+                    <div
+                        className='row container users-container'
+                        style={{
+                            transform: `translate(${this.state.drawerOpen ? 150 : 0}px, ${0}px)`,
+                            display: 'flex'
+                        }}
+                    >
+
+                        {users.length != 0
+                            ? users.map((user, index) => <User user={user} ></User>)
+                            : null
+                        }
+                    </div>
+                </section>
+                
     
                 {/* <Slider/> */}
                 { this.state.lastSearch !== '' 
