@@ -48,23 +48,23 @@ const playlists = JSON.parse(window.localStorage.getItem('playlists')) || [{
     ]
 }]
 
-const users = [{
-        user_id: 2,
-        email: 'teste@teste.com',
-        username: 'jose',
-        thumbnail_url: null
-    },{
-        user_id: 2,
-        email: 'teste@teste.com',
-        username: 'batatacosta',
-        thumbnail_url: null
-    },{
-        user_id: 2,
-        email: 'teste@teste.com',
-        username: 'fred',
-        thumbnail_url: null
-    }
-]
+// const users = [{
+//         user_id: 2,
+//         email: 'teste@teste.com',
+//         username: 'jose',
+//         thumbnail_url: null
+//     },{
+//         user_id: 2,
+//         email: 'teste@teste.com',
+//         username: 'batatacosta',
+//         thumbnail_url: null
+//     },{
+//         user_id: 2,
+//         email: 'teste@teste.com',
+//         username: 'fred',
+//         thumbnail_url: null
+//     }
+// ]
 
 // for (let i = 0; i < 10; i++) {
 //     playlists[0].songs.push({
@@ -84,6 +84,7 @@ class Main extends Component {
             spotifyResults : [],
             youtubeResults : [],
             soundcloudResults : [],
+            userResults :[], //variable for user results in search bar
             currentSource : '',
             currentVideo : null, 
             currentTrack : null,
@@ -101,6 +102,7 @@ class Main extends Component {
             playlists: playlists,
             isEmpty: true,
             playlistIndex: -1,
+            users: null,
             songIndex: -1
         }
     }
@@ -130,6 +132,7 @@ class Main extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
+        console.log("state mudou")
     }
 
     onLogin = (user) => {
@@ -154,10 +157,25 @@ class Main extends Component {
                 this.setState({ soundcloudResults : songs })
             })
 
+            auth.searchUser(this.state.search, (retrievedUsers) => {
+                this.setState({userResults: retrievedUsers})
+            })
+
+            this.onSearchUser(this.state.search)
+
             this.setState({lastSearch : this.state.search})
         }
     }
 
+    getUsers = async () => {
+        let result = await auth.getUsers()
+        this.setState({users: result})
+    }
+
+    onSearchUser = async(info) => {
+        let result = await auth.searchUser(info)
+        this.setState({userResults: result})
+    }
 
     onSearchChange = (text) => {
         this.setState({search : text})
@@ -584,11 +602,13 @@ class Main extends Component {
                     className='row container users-container' 
                     style={{
                         transform: `translate(${this.state.drawerOpen ? 150 : 0}px, ${0}px)`,
-                        display: 'flex'
+                        display: 'flex' 
                     }}
-                >
-                    { users.length != 0
-                        ? users.map((user, index) => <User user={user} ></User>)
+                >   
+                    {
+                        this.state.users                        // Alterei nesta linha para map com this.state.users
+                        ?
+                        this.state.users.map((user, index) => <User user={user} ></User>)
                         : null
                     }
                 </div>

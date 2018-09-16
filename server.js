@@ -14,8 +14,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const con = mysql.createConnection({
   host: "localhost",
-  user: "fredcurti",
-  password: "1170",
+  user: "root",
+  password: "password",
   database: 'streamaster'
 });
 
@@ -54,6 +54,34 @@ app.post('/api/user', (req, res) => {
         res.json({ email: email, username: username, password: password, status: 200 })
       })
     }
+  })
+})
+
+app.get('/api/users', (req, res) => {
+  console.log("Get Users Request")
+  con.query("SELECT user_id, email, username, thumbnail_url FROM User", (err, result) => {
+    console.log("Result incoming:")
+    let callback = JSON.parse(JSON.stringify(result))
+    res.json(callback)
+  })
+})
+
+app.get('/api/playlist', (req, res) => {
+  console.log("Get Playlists request")
+  console.log(req)
+})
+
+//Search User
+app.get('/api/user/:info', (req, res) => {
+  console.log(req.params.info)
+  let info = req.params.info;
+  
+  //SELECT * FROM User WHERE username LIKE '%rapha%' OR email LIKE '%rapha%';
+  //let sql = "SELECT user_id, email, username, thumbnail_url FROM User WHERE email LIKE '%"+info+"%'" + "OR username LIKE '%"+info+"%'" 
+  let query = con.query("SELECT user_id, email, username, thumbnail_url FROM User WHERE email LIKE ?", ["'%" + info + "%'"],(err, result) => {
+    console.log(query.sql)
+    console.log("Result: ")
+    console.log(result)
   })
 })
 

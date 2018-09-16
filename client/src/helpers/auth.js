@@ -64,6 +64,32 @@ export default window.auth = {
         return user
     },
 
+    getUsers: async() => {
+        let res = await fetch('/api/users', {
+            headers: { "Content-Type": "application/json" },
+            method: 'GET',
+        })
+
+        let data = await res.json()
+        console.log("getUsers auth print")
+        // for(var i = 0; i < data.length; i++){
+        //     console.log(data[i])
+        //     callback
+        // }
+        return data
+    },
+
+    searchUser: async(info) => {
+        console.log("Searching for: " + info)
+        let res = await fetch('api/user/' + info, {
+            headers: { "Content-Type": "application/json" },
+            method: 'GET',
+        })
+        let data = await res.json()
+        console.log(data)
+        return data
+    },
+
     register : async (email,username,password,imageBase64) => {
         // let fd = new FormData();
         // fd.append('email',email)
