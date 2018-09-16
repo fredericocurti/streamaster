@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import '../css/main.css'
+import favicon from '../assets/favicon.png'
 
 import Draggable, {DraggableCore} from 'react-draggable'; // Both at the same time
 import YouTube from 'react-youtube'
