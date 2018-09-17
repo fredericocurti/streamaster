@@ -56,8 +56,9 @@ class Login extends Component {
     }
   }
 
-  handleRegister = () => {
-    auth.register(this.state.textFields.email,this.state.textFields.userName,this.state.textFields.password,this.state.imageBlob)
+  handleRegister = async () => {
+    let res = await auth.register(this.state.textFields.email,this.state.textFields.userName,this.state.textFields.password,this.state.imageBlob)
+    if (res) this.props.onLogin(res)
   }
 
   switchDialogContent = () => {

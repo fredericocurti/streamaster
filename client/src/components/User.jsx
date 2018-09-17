@@ -9,7 +9,8 @@ class User extends Component {
     super(props)
     this.state = {
       thumbnailReady: true,
-      showMenu: true
+      showMenu: true,
+      isClicked: props.isClicked || false 
     }
   }
 
@@ -22,6 +23,10 @@ class User extends Component {
     // this.props.onClick(this.props.user)
     // window.open(this.props.track.external_urls.spotify,'_blank')
     // console.log(this.props.track.uri)
+    this.setState({ isClicked: !this.state.isClicked })
+    if (this.props.onClick) {
+      this.props.onClick(this.props.user, this.props.i)
+    }
   }
 
   onMouseOver = () => {
@@ -35,24 +40,52 @@ class User extends Component {
 
   render() {
     let {user} = this.props
-
+    let {isClicked} = this.state
+// col m2 l2 s6
     return (
-      <span className='user-container col m2 l2 s6'>
-        <span className='user-badge'>
-          <img
-            src={placeholder}
-            className='user-thumbnail'
-            width={64}
-            height={64}
-            style={{ verticalAlign: 'middle' }}
-            alt=""
-            onLoad={() => { this.setState({ thumbnailReady: true }) }}
-          />
-        </span>
+      <span className={`user-container ${isClicked ? 'expanded' : 'default'}`} onClick={() => {
+        this.onClick()
+      }}>
+        <div className='user-info-small'>
+            <span className='user-badge'>
+              <img
+                src={placeholder}
+                className='user-thumbnail'
+                width={64}
+                height={64}
+                style={{ verticalAlign: 'middle' }}
+                alt=""
+                onLoad={() => { this.setState({ thumbnailReady: true }) }}
+              />
+            </span>
 
-        <span className='user-name'>
-          {user.username}
-        </span>
+            <span className='user-name'>
+              {user.username}
+            </span>
+          {isClicked
+            ? <FlatButton
+              label={"Follow"}
+              secondary={true}
+              style={{marginTop: 30}}
+              icon={<FontIcon className="material-icons">visibility</FontIcon>}
+            />
+            : null
+          }
+
+
+        </div>
+        
+        {isClicked
+          ? <div>
+            <FlatButton
+              label={"Playlists"}
+              secondary={true}
+              icon={<FontIcon className="material-icons" />}
+            />
+
+            </div>
+          : null
+        }
 
       </span>
       // <span

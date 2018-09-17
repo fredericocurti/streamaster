@@ -6,7 +6,7 @@ emitter.setMaxListeners(20)
 const baseUrl = '/api/'
 // const baseUrl = 'http://10.92.44.177:8080/'
 
-var user = { 
+var user = {
     email : null,
     userName : null,
     image : null
@@ -76,17 +76,6 @@ export default window.auth = {
         //     console.log(data[i])
         //     callback
         // }
-        return data
-    },
-
-    searchUser: async(info) => {
-        console.log("Searching for: " + info)
-        let res = await fetch('api/user/' + info, {
-            headers: { "Content-Type": "application/json" },
-            method: 'GET',
-        })
-        let data = await res.json()
-        console.log(data)
         return data
     },
 

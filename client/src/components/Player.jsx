@@ -26,16 +26,14 @@ class Player extends Component{
 
 
     }
-
-
     componentWillMount(){
       this.interval = setInterval(this.tick, 1000);
-      if (this.props.info.currentSource == 'spotify') {
+      if (this.props.info.currentSource === 'spotify') {
         spotify.play(this.props.info.currentTrack, () => {
         })
-      } else if (this.props.info.currentSource == 'youtube') {
+      } else if (this.props.info.currentSource === 'youtube') {
         spotify.pause()
-      } else if (this.props.info.currentSource == 'soundcloud') {
+      } else if (this.props.info.currentSource === 'soundcloud') {
         spotify.pause()
       }
 
@@ -57,32 +55,32 @@ class Player extends Component{
         console.log('[Player] Switched source to ' + nextProps.info.currentSource)
         this.setState({ slider : 0, playing : false })
 
-        if (nextProps.info.currentSource == 'youtube') {
+        if (nextProps.info.currentSource === 'youtube') {
           this.setState({ slider : 0.0, playing : true })                    
           spotify.pause()
           console.log('[Player] Current source is YouTube, pausing Spotify')
         }
   
-        if (nextProps.info.currentSource == 'spotify') {
+        if (nextProps.info.currentSource === 'spotify') {
           spotify.play(nextProps.info.currentTrack, () => {
             this.setState({ slider: 0.0, playing : true })
           })
         }
 
-        if (nextProps.info.currentSource == 'soundcloud'){
+        if (nextProps.info.currentSource === 'soundcloud'){
           this.setState({ slider : 0.0, playing : true })          
           spotify.pause()
         }
       }
 
-      if (this.props.info.currentSource == 'spotify') {
+      if (this.props.info.currentSource === 'spotify') {
         if (this.props.info.currentTrack != nextProps.info.currentTrack) {
           console.log('[Player] Player switched songs')
           spotify.play(nextProps.info.currentTrack, () => {
             this.setState({ slider: 0.0, playing : true })
           }) 
         }
-      } else if (this.props.info.currentSource == 'soundcloud'){
+      } else if (this.props.info.currentSource === 'soundcloud'){
         if (this.props.info.currentSoundcloudTrack != nextProps.info.currentSoundcloudTrack){
           this.setState({ slider: 0.0, playing : true, scPlaying : false })          
         }
@@ -90,13 +88,13 @@ class Player extends Component{
     }
 
     togglePlayback = () => {
-      if (this.props.info.currentSource == 'spotify') {
+      if (this.props.info.currentSource === 'spotify') {
         if (this.state.playing) {
           spotify.pause()
         } else {
           spotify.resume()
         }
-      } else if (this.props.info.currentSource == 'youtube'){
+      } else if (this.props.info.currentSource === 'youtube'){
         if (this.state.playing){
           this.youtubePlayer().pauseVideo()
         } else {
@@ -107,19 +105,19 @@ class Player extends Component{
     }
     
     tick = () => {
-      if (this.props.info.currentSource == 'spotify') {
-        if (this.state.playing == true 
-            && this.state.dragging == false
+      if (this.props.info.currentSource === 'spotify') {
+        if (this.state.playing === true 
+            && this.state.dragging === false
             && (this.state.slider <= this.props.info.currentTrack.duration_ms/1000 - 1) ) {
           let current = this.state.slider + 1
           this.setState({ slider: current });
         }
-      } else if (this.props.info.currentSource == 'youtube'){
-        if (this.state.dragging == false){
+      } else if (this.props.info.currentSource === 'youtube'){
+        if (this.state.dragging === false){
           this.setState({ slider : this.youtubePlayer().getCurrentTime() })
         }
-      } else if (this.props.info.currentSource == 'soundcloud'){
-        if (this.state.dragging == false) {
+      } else if (this.props.info.currentSource === 'soundcloud'){
+        if (this.state.dragging === false) {
           this.setState({ slider : parseInt(this.scPlayer.getCurrentTime()) || 0 })
       }
     }
@@ -133,16 +131,16 @@ class Player extends Component{
     };
     
     onSliderStop = () => {
-      if (this.props.info.currentSource == 'spotify') {
+      if (this.props.info.currentSource === 'spotify') {
         spotify.seek(parseInt(this.state.slider * 1000),(status) => {
-          if (status == 204) {
+          if (status === 204) {
             this.setState({ dragging : false })
           }
         })
-      } else if (this.props.info.currentSource == 'youtube'){
+      } else if (this.props.info.currentSource === 'youtube'){
         this.youtubePlayer().seekTo(this.state.slider)
         this.setState({ dragging : false })
-      } else if (this.props.info.currentSource == 'soundcloud'){
+      } else if (this.props.info.currentSource === 'soundcloud'){
         this.scPlayer.seekTo(this.state.slider)
         this.setState({ dragging : false })        
       }
@@ -153,20 +151,20 @@ class Player extends Component{
     }
 
     changeVolume = () => {
-      if (this.props.info.currentSource == 'spotify'){
+      if (this.props.info.currentSource === 'spotify'){
         spotify.setVolume(this.state.volume * 100)
-      } else if (this.props.info.currentSource == 'youtube'){
+      } else if (this.props.info.currentSource === 'youtube'){
         this.youtubePlayer().setVolume(parseInt(this.state.volume * 100))
       }
     
     }
 
     getSliderMax = () => {
-      if (this.props.info.currentSource == 'spotify') {
+      if (this.props.info.currentSource === 'spotify') {
         return parseInt(this.props.info.currentTrack.duration_ms / 1000)
-      } else if (this.props.info.currentSource == 'youtube') {
+      } else if (this.props.info.currentSource === 'youtube') {
         return parseInt(this.youtubePlayer().getDuration())
-      } else if (this.props.info.currentSource == 'soundcloud') {
+      } else if (this.props.info.currentSource === 'soundcloud') {
         return parseInt(this.props.info.currentSoundcloudTrack.duration_ms/1000 || this.props.info.currentSoundcloudTrack.duration / 1000)
       }
     }
@@ -180,7 +178,7 @@ class Player extends Component{
       const getArtistsNames = () => {
         let names = ''
         let i = 0
-        if (this.props.info.currentSource == 'spotify') {
+        if (this.props.info.currentSource === 'spotify') {
           for (i ; i < this.props.info.currentTrack.artists.length ; i ++){
             if ( i < this.props.info.currentTrack.artists.length - 1 ){
                 names += this.props.info.currentTrack.artists[i].name + ', '
@@ -193,23 +191,23 @@ class Player extends Component{
       }
 
       const getSongName = () => {
-        if (this.props.info.currentSource == 'spotify') {
+        if (this.props.info.currentSource === 'spotify') {
           return (this.props.info.currentTrack.title || this.props.info.currentTrack.name)
-        } else if (this.props.info.currentSource == 'youtube') {
+        } else if (this.props.info.currentSource === 'youtube') {
           return this.props.info.currentVideo.title || this.props.info.currentVideo.snippet.title
-        } else if (this.props.info.currentSource == 'soundcloud') {
+        } else if (this.props.info.currentSource === 'soundcloud') {
           return this.props.info.currentSoundcloudTrack.title
         }
       }
 
       const getMaxTime = () => {
-        if (this.props.info.currentSource == 'spotify'){
+        if (this.props.info.currentSource === 'spotify'){
           let mt = moment.utc(this.props.info.currentTrack.duration_ms).format('mm:ss')
           return mt
-        } else if ( this.props.info.currentSource == 'youtube'){
+        } else if ( this.props.info.currentSource === 'youtube'){
           let mt = moment.utc(this.youtubePlayer().getDuration() * 1000).format('mm:ss')
           return mt
-        } else if ( this.props.info.currentSource == 'soundcloud'){
+        } else if ( this.props.info.currentSource === 'soundcloud'){
           let dur = this.scPlayer ? this.scPlayer.getDuration() : 0
           let mt = moment.utc(dur * 1000).format('mm:ss')
           return mt
@@ -217,13 +215,13 @@ class Player extends Component{
       }
 
       const getCurrentTime = () => {
-        if (this.props.info.currentSource == 'spotify'){
+        if (this.props.info.currentSource === 'spotify'){
           let ct = moment.utc(this.state.slider * 1000).format('mm:ss')
           return ct              
-        } else if ( this.props.info.currentSource == 'youtube'){
+        } else if ( this.props.info.currentSource === 'youtube'){
           let ct = moment.utc(this.youtubePlayer().getCurrentTime() * 1000).format('mm:ss')
           return ct              
-        } else if (this.props.info.currentSource == 'soundcloud'){
+        } else if (this.props.info.currentSource === 'soundcloud'){
           let ct = moment.utc(this.state.slider * 1000).format('mm:ss')
           return ct              
         }
@@ -232,11 +230,11 @@ class Player extends Component{
 
 
       const getThumbnail = () => {
-        if (this.props.info.currentSource == 'spotify') {
+        if (this.props.info.currentSource === 'spotify') {
           return this.props.info.currentTrack.thumbnail_url || this.props.info.currentTrack.album.images[2].url
-        } else if (this.props.info.currentSource == 'youtube'){
+        } else if (this.props.info.currentSource === 'youtube'){
           return this.props.info.currentVideo.thumbnail_url || this.props.info.currentVideo.snippet.thumbnails.default.url
-        } else if (this.props.info.currentSource == 'soundcloud'){
+        } else if (this.props.info.currentSource === 'soundcloud'){
           return this.props.info.currentSoundcloudTrack.thumbnail_url || this.props.info.currentSoundcloudTrack.artwork_url
         }
       }
@@ -315,7 +313,7 @@ class Player extends Component{
 
             </BottomNavigation>
 
-            {/* {this.props.info.currentSource === 'soundcloud' */}
+            {/* {this.props.info.currentSource ==== 'soundcloud' */}
               <ReactPlayer
                 style={{ display: 'none' }}
                 url={
