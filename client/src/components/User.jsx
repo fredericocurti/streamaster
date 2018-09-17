@@ -3,6 +3,7 @@ import { Card, CardActions, CardHeader, CardMedia, CardTitle, CardText } from 'm
 import FlatButton from 'material-ui/FlatButton';
 import FontIcon from 'material-ui/FontIcon'
 import placeholder from '../assets/thumb-placeholder.png'
+import api from '../helpers/api';
 
 class User extends Component {
   constructor(props) {
@@ -10,12 +11,19 @@ class User extends Component {
     this.state = {
       thumbnailReady: true,
       showMenu: true,
-      isClicked: props.isClicked || false 
+      isClicked: props.isClicked || false,
+      playlists: []
     }
   }
 
   componentWillMount() {
     // this.setState({ thumbnailReady: false })
+    api.getUserPlaylists(this.props.user)
+    .then(res => {
+      this.setState({
+          playlists: res
+      })
+    }) 
   }
 
 
@@ -23,10 +31,22 @@ class User extends Component {
     // this.props.onClick(this.props.user)
     // window.open(this.props.track.external_urls.spotify,'_blank')
     // console.log(this.props.track.uri)
-    this.setState({ isClicked: !this.state.isClicked })
+    if (!this.props.isStatic) {
+      this.setState({ isClicked: !this.state.isClicked })
+    }
+    
     if (this.props.onClick) {
       this.props.onClick(this.props.user, this.props.i)
     }
+  }
+
+  onFollowClick = (e) => {
+    e.stopPropagation()
+    this.props.onFollowClick(this.props.auth, this.props.user)
+  }
+
+  onPlaylistClick = (playlist) => {
+    this.props.onPlaylistClick(playlist)
   }
 
   onMouseOver = () => {
@@ -68,6 +88,7 @@ class User extends Component {
               secondary={true}
               style={{marginTop: 30}}
               icon={<FontIcon className="material-icons">visibility</FontIcon>}
+              onClick={this.onFollowClick}
             />
             : null
           }
@@ -75,16 +96,21 @@ class User extends Component {
 
         </div>
         
-        {isClicked
-          ? <div>
-            <FlatButton
-              label={"Playlists"}
-              secondary={true}
-              icon={<FontIcon className="material-icons" />}
-            />
-
+        {this.state.isClicked 
+          ? <div className='user-playlists-container'>
+            <div>
+              <FlatButton
+                label={"Playlists"}
+                secondary={true}
+                icon={<FontIcon className="material-icons" />}
+              />
             </div>
-          : null
+            {this.state.playlists.map((p) => <div onClick={(e) => {
+              e.stopPropagation()
+              this.onPlaylistClick(p)
+            }} className='playlist-user-item'> {p.name} </div>)}
+        </div>
+        : null
         }
 
       </span>

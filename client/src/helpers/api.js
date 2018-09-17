@@ -21,6 +21,59 @@ export default window.auth = {
         return res
     },
 
+    followUser: async (user1, user2) => {
+        let req = {
+            headers: { "Content-Type": "application/json" },
+            method: 'POST',
+            body: JSON.stringify({
+                user_id1: user1.user_id, // yourself
+                user_id2: user2.user_id, // other user
+            })
+        }
+        console.log(req)
+        let res = await fetch('api/user/friend', req)
+    },
+
+    unfollowUser: async (user1, user2) => {
+        let req = {
+            headers: { "Content-Type": "application/json" },
+            method: 'DELETE',
+            body: JSON.stringify({
+                user_id1: user1.user_id, // yourself
+                user_id2: user2.user_id, // other user
+            })
+        }
+        console.log(req)
+        let res = await fetch('api/user/friend', req)
+    },
+
+    followPlaylist: async (playlist, user) => {
+        let req = {
+            headers: { "Content-Type": "application/json" },
+            method: 'POST',
+            body: JSON.stringify({
+                user_id: user.user_id, // yourself
+                playlist_id: playlist.playlist_id, // other user
+            })
+        }
+        console.log(req)
+        let res = await fetch('api/playlist/follow', req)
+    },
+
+    unfollowPlaylist: async (user1, user2) => {
+        let req = {
+            headers: { "Content-Type": "application/json" },
+            method: 'DELETE',
+            body: JSON.stringify({
+                user_id1: user1.user_id, // yourself
+                user_id2: user2.user_id, // other user
+            })
+        }
+        console.log(req)
+        let res = await fetch('api/playlist/follow', req)
+    },
+
+
     getUser: async(user) => {
         console.log('user')
         let res = await fetch('api/' + user.user_id + '/friend', {
@@ -123,5 +176,38 @@ export default window.auth = {
 
         let data = await res.json()
         return data
+    },
+
+//INBOX
+    sendInbox: (origin_user, destination_user, song) => {
+        console.log("API helper called for sending inbox")
+        let res = fetch('api/user/inbox', {
+            headers: { "Content-Type": "application/json" },
+            method: 'POST',
+            body: JSON.stringify({
+                origin_user_id: origin_user.user_id,
+                destination_user_id: destination_user.user_id,
+                song: song
+            })
+        }) 
+    },
+
+    getUserInbox: async(user) => {
+        console.log("API helper called for getting inbox")
+        let res = await fetch('api/' + user.user_id + "/inbox", {
+            headers: { "Content-Type": "application/json" },
+            method: 'GET',
+        })
+        res = await res.json()
+        return res
+    },
+
+    clearInbox: (user) => {
+        console.log("API helper called for clearing inbox")
+        let res = fetch('/api/user/inbox', {
+            headers: { "Content-Type": "application/json" },
+            method: 'DELETE',
+            body: JSON.stringify(user)
+        })
     }
 }

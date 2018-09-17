@@ -5,6 +5,7 @@ import RaisedButton from 'material-ui/RaisedButton'
 import FontIcon from 'material-ui/FontIcon'
 import song from '../helpers/song';
 import PlaylistModal from './PlaylistModal';
+import api from '../helpers/api.js'
 import {capitalize} from 'lodash'
 
 /**
@@ -114,6 +115,12 @@ export default class Modal extends React.Component {
     this.props.onSongAddedToPlaylist(this.state.songInfo, playlist, playlistIndex)
     this.props.onModalClose()
   }
+
+  onFriendSelected = (following) => {
+    console.log("following chose: ", following)
+    api.sendInbox(this.props.user, following, this.state.songInfo)
+    this.props.onModalClose()
+  }
  
   
   render() {
@@ -132,7 +139,8 @@ export default class Modal extends React.Component {
           <Dialog
             title={
               this.state.step === 'choice' ? i.title + ' - ' + i.artist : null 
-                || this.state.step === 'add' ? `Add ${i.title + ' - ' + i.artist} to playlist` : null}
+                || this.state.step === 'add' ? `Add ${i.title + ' - ' + i.artist} to playlist` : null
+                || this.state.step === 'share' ? `Share ${i.title + ' - ' + i.artist} with` : null}
             modal={false}
             open={this.props.open}
             onRequestClose={this.props.onModalClose}
@@ -177,6 +185,26 @@ export default class Modal extends React.Component {
                       }}
                       key={'p' + i}
                     > {p.name} </RaisedButton>
+                    </div>
+                    ))
+                  : null
+              }
+              {/* <img src={i.thumbnailUrl}> </img> */}
+            </div>
+            : null
+          }
+          {this.state.step === 'share'
+            ? <div className='modal-container-3' style={{flexDirection: 'column'}}>
+                {this.props.playlists 
+                  ? this.props.following.map((f,i) => (
+                    <div>    
+                    <RaisedButton
+                      className='share-friend-btn'
+                      style={{margin: 5}}
+                      onClick={() => {
+                        this.onFriendSelected(f)
+                      }}
+                      key={'f' + i}> {f.username} </RaisedButton>
                     </div>
                     ))
                   : null

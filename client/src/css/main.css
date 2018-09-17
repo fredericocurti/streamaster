@@ -534,6 +534,15 @@ input {
     padding: 20px;
 }
 
+.playlist-user-item {
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.playlist-user-item:hover {
+    background: lightgray;
+}
+
 section {
     padding: 0 20px;
 }

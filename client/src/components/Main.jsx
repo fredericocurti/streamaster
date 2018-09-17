@@ -106,6 +106,8 @@ class Main extends Component {
             drawerOpen: false,
             creatingPlaylist: false,
             playlists: [],
+            followingPlaylists: [],
+            inbox: [],
             isEmpty: true,
             playlistIndex: -1,
             users: null,
@@ -158,6 +160,11 @@ class Main extends Component {
                     this.setState({ playlists: res })
                     console.log('PLAYLISTS', res)
                 })
+            api.getUserInbox(user)
+                .then((res) => {
+                    this.setState({ inbox: res })
+                    console.log('INBOX', res)                    
+                })                                
         }
     }
 
@@ -315,7 +322,6 @@ class Main extends Component {
         } else {
             this.onPlaylistPlay(playlists[playlistIndex], 0, playlistIndex)
         }
-
     }
 
     // Ao tocar track da playlist
@@ -348,12 +354,16 @@ class Main extends Component {
         // API CALL 
     }
 
-    onSongAddedToPlaylist = (song, playlist, playlistIndex) => {
+    onSongAddedToPlaylist = async (song, playlist, playlistIndex) => {
         console.log('added song',song, 'to playlist', playlist, 'index', playlistIndex)
         // API CALL TO STORE
-        api.insertSongOnPlaylist(song, playlist)
+        let res = await api.insertSongOnPlaylist(song, playlist)
+        console.log(res.track_id)
         let p = [...this.state.playlists]
-        p[playlistIndex].songs.push(song)
+        p[playlistIndex].songs.push({
+            ...song,
+            track_id: res.track_id
+        })
         this.setState({playlists: p})
         // })
     }
@@ -378,6 +388,39 @@ class Main extends Component {
         //         userResults: r
         //     })    
         // }, 50);
+    }
+
+    getUsernameForUserId(user_id) {
+        if (this.state.following.length > 0 || this.state.followers.length > 0) {
+            let f = this.state.followers.find((u) => {
+                return u.user_id === user_id ? true : false
+            })
+            let f2 = this.state.followers.find((u) => {
+                return u.user_id === user_id ? true : false
+            })
+            console.log(f ? f.username : null || f2 ? f2.username : null)
+            return (f ? f.username : null || f2 ? f2.username : null)
+        } else {
+            return null
+        }   
+    }
+
+    onPlaylistClick = (playlist) => {
+        api.followPlaylist(playlist, this.props.auth)
+        if (this.state.followingPlaylists.findIndex((e) => e === 5)) {
+            this.setState({follo})
+        }
+    }
+
+    onFollowClick = (me, user) => {
+        let follows = this.state.following.find((el) => { if (el.user_id === user.user_id) return true })
+        if (!follows) { // Nao segue ainda
+            this.setState({ following: [...this.state.following, user] })
+            api.followUser(me, user)
+        } else {
+            this.setState({ following: [...this.state.following].filter((u) => u.user_id !== user.user_id )})
+            api.unfollowUser(me, user)
+        }
     }
 
     render() {
@@ -437,6 +480,8 @@ class Main extends Component {
                         modalSource={this.state.modalSource}
                         playlists={this.state.playlists}
                         onSongAddedToPlaylist={this.onSongAddedToPlaylist}
+                        user={this.state.auth}
+                        following={this.state.following}
                     />
                     : null
                 }
@@ -459,6 +504,7 @@ class Main extends Component {
                         { this.state.playlists.length > 0
                             ?   this.state.playlists.map((p, playlistIndex) => {
                                     const type = p.title;
+                                    const isMine = p.user_id === this.state.auth.user_id
                                     const label = (
                                         <span>
                                             <span
@@ -476,17 +522,20 @@ class Main extends Component {
                                                 }}
                                                 contentEditable={p.name == 'New Playlist' ? true : false}
                                             >
-                                                {p.name}
+                                                {p.name} {p.user_id !== this.state.auth.user_id ? '- ' + this.getUsernameForUserId(p.user_id) : null}
                                             </span>
 
-                                            <span className='playlist-delete-btn' onClick={() => {
-                                                this.onPlaylistDelete(this.state.playlists, playlistIndex)
-                                                let p = [...this.state.playlists]
-                                                p.splice(playlistIndex, 1)
-                                                this.setState({ playlists: p })
-                                            }}>
-                                                ✖️
-                                    </span>
+                                            {isMine 
+                                                ?   <span className='playlist-delete-btn' onClick={() => {
+                                                        this.onPlaylistDelete(this.state.playlists, playlistIndex)
+                                                        let p = [...this.state.playlists]
+                                                        p.splice(playlistIndex, 1)
+                                                        this.setState({ playlists: p })
+                                                    }}>
+                                                        ✖️
+                                                    </span>
+                                                :   null
+                                            }
                                         </span>
 
                                     )
@@ -516,13 +565,16 @@ class Main extends Component {
                                                                 }
                                                                 {' '} {song.title} - {song.artist}
                                                             </span>
-                                                            <span className='song-delete-btn' onClick={() => {
+                                                            {isMine
+                                                            ?<span className='song-delete-btn' onClick={() => {
                                                                 let p = [...this.state.playlists]
                                                                 this.onSongDelete(p[playlistIndex], song)
                                                                 p[playlistIndex].songs.splice(si, 1)
                                                                 this.setState({ playlists: p })
                                                             }}> ✖️
-                                                </span>
+                                                            </span>
+                                                            : null
+                                                            }
                                                         </div>
 
                                                     );
@@ -577,7 +629,7 @@ class Main extends Component {
                         <IconButton data-tip data-for='sadFace' style={{ background: 'white', borderRadius: 50, marginRight: 15 }} onClick={this.handleDrawer}>
                             <FontIcon className="material-icons"> tag_faces </FontIcon>
                         </IconButton>
-                        <IconButton data-tip data-for='sadFace' style={{ background: 'white', borderRadius: 50, marginRight: 15 }} onClick={this.handleDrawer}>
+                        <IconButton data-tip data-for='inbox' style={{ background: 'white', borderRadius: 50, marginRight: 15 }} onClick={this.handleDrawer}>
                             <FontIcon className="material-icons"> inbox </FontIcon>
                         </IconButton>
                         <IconButton style={{background: 'white', borderRadius: 50}} onClick={this.handleDrawer} tooltip={'Playlists'}>
@@ -604,6 +656,25 @@ class Main extends Component {
                                     > {el.username} </div>)}
                                 </div>
 
+                            </div>
+                        </ReactTooltip>
+
+                        <ReactTooltip delayHide={500} className='tooltip-class' place='bottom' id='inbox' type='light' effect='solid'>
+                            <div className='hoverable-container'>
+                                <div className='friend-cat'>
+                                    Received
+                                    {/* {this.state.inbox.map((message,i) => 
+                                        <div 
+                                            key={'message'+message.user_id} 
+                                            className='friend-item' 
+                                            onClick={() => {
+                                                // this.onFriendClick(el, i)
+                                            }}
+                                        >
+                                                {message.username}
+                                        </div>
+                                    )} */}
+                                </div>
                             </div>
                         </ReactTooltip>
 
@@ -682,7 +753,9 @@ class Main extends Component {
                         </div>
                         <div className='row users-container'>
                             {this.state.userResults.length > 0 // Alterei nesta linha para map com this.state.users
-                                ? this.state.userResults.map((user, index) => <User key={user.user_id} i={index} onClick={this.onUserClick} user={user} {...this.state} ></User>)
+                                ? this.state.userResults.map((user, index) => {
+                                    return <User key={user.user_id} onPlaylistClick={this.onPlaylistClick} onFollowClick={this.onFollowClick} i={index} onClick={this.onUserClick} user={user} {...this.state} ></User>
+                                })
                                 : null
                             }
                         </div>
@@ -697,7 +770,7 @@ class Main extends Component {
                         this.setState({ selectedFriend: null })
                     }}
                 >
-                    <User isClicked onClick={this.onUserClick} user={this.state.selectedFriend ? this.state.selectedFriend : null} {...this.state} ></User>
+                    <User isClicked isStatic onFollowClick={this.onFollowClick} onClick={this.onUserClick} user={this.state.selectedFriend ? this.state.selectedFriend : null} {...this.state} ></User>
                 </Dialog>
                 
                 
