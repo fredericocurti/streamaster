@@ -175,7 +175,9 @@ export default class Modal extends React.Component {
           {this.state.step === 'add'
             ? <div className='modal-container-2' style={{flexDirection: 'column'}}>
                 {this.props.playlists 
-                  ? this.props.playlists.map((p,i) => (
+                  ? this.props.playlists
+                    .filter((el) => el.user_id === this.props.user.user_id ? true : false)
+                    .map((p,i) => (
                     <div>    
                     <RaisedButton
                       className='add-playlist-btn'

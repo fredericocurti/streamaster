@@ -398,7 +398,7 @@ class Main extends Component {
             let f2 = this.state.followers.find((u) => {
                 return u.user_id === user_id ? true : false
             })
-            console.log(f ? f.username : null || f2 ? f2.username : null)
+            // console.log(f ? f.username : null || f2 ? f2.username : null)
             return (f ? f.username : null || f2 ? f2.username : null)
         } else {
             return null
@@ -406,10 +406,19 @@ class Main extends Component {
     }
 
     onPlaylistClick = (playlist) => {
-        api.followPlaylist(playlist, this.props.auth)
-        if (this.state.followingPlaylists.findIndex((e) => e === 5)) {
-            this.setState({follo})
+        let i = this.state.playlists.findIndex((e) => e.playlist_id === playlist.playlist_id)
+        console.log(i)
+        if (i === -1) {
+            this.setState({playlists: [...this.state.playlists, playlist], drawerOpen: true })
+            api.followPlaylist(playlist, this.state.auth)
+        } else {
+            console.log('ja tem essa fera, tirando')
+            api.unfollowPlaylist(playlist, this.state.auth)
+            let p = this.state.playlists.filter((el,ind) => i !== ind ? true : false)
+            this.setState({playlists: p})
         }
+            // this.setState({playlists: this.state.playlists.filter((e) => e.playlist_id !== playlist.playlist_id)})
+        // }
     }
 
     onFollowClick = (me, user) => {
@@ -522,7 +531,10 @@ class Main extends Component {
                                                 }}
                                                 contentEditable={p.name == 'New Playlist' ? true : false}
                                             >
-                                                {p.name} {p.user_id !== this.state.auth.user_id ? '- ' + this.getUsernameForUserId(p.user_id) : null}
+                                                {p.name} 
+                                                <span style={{color: 'lightgray'}}>
+                                                    {p.user_id !== this.state.auth.user_id ? ' by ' + this.getUsernameForUserId(p.user_id) : null}
+                                                </span>
                                             </span>
 
                                             {isMine 
@@ -638,7 +650,7 @@ class Main extends Component {
 
                         {/* <a data-tip data-for='sadFace'> இдஇ </a> */}
  
-                        <ReactTooltip delayHide={500} className='tooltip-class' place='bottom' id='sadFace' type='light' effect='solid'>
+                        <ReactTooltip delayHide={100} className='tooltip-class' place='bottom' id='sadFace' type='light' effect='solid'>
                             <div className='hoverable-container'>
                                 <div className='friend-cat'>
                                     Following
@@ -659,7 +671,7 @@ class Main extends Component {
                             </div>
                         </ReactTooltip>
 
-                        <ReactTooltip delayHide={500} className='tooltip-class' place='bottom' id='inbox' type='light' effect='solid'>
+                        <ReactTooltip delayHide={100} className='tooltip-class' place='bottom' id='inbox' type='light' effect='solid'>
                             <div className='hoverable-container'>
                                 <div className='friend-cat'>
                                     Received
@@ -770,7 +782,7 @@ class Main extends Component {
                         this.setState({ selectedFriend: null })
                     }}
                 >
-                    <User isClicked isStatic onFollowClick={this.onFollowClick} onClick={this.onUserClick} user={this.state.selectedFriend ? this.state.selectedFriend : null} {...this.state} ></User>
+                    <User isClicked isStatic onPlaylistClick={this.onPlaylistClick} onFollowClick={this.onFollowClick} onClick={this.onUserClick} user={this.state.selectedFriend ? this.state.selectedFriend : null} {...this.state} ></User>
                 </Dialog>
                 
                 

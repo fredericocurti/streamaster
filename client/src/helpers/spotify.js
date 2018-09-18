@@ -134,8 +134,14 @@ export default window.spotify = {
     return spotifyConfig.token
   },
 
-  play : function(track,callback){
-    console.log(track.uri)
+  play : function(track, callback){
+    let uris = []
+    if (track.uri) {
+      uris.push(track.uri)
+    } else {
+      uris.push(track.url)
+    }
+    
     let request = {
         method : 'PUT',
         headers : {
@@ -143,10 +149,11 @@ export default window.spotify = {
             'Content-Type' : 'application/json',
         },
         body : JSON.stringify({ 
-            "uris" : [track.url ||track.uri]
+            "uris" : uris
         })
     }
-    fetch('https://api.spotify.com/v1/me/player/play',request).then((res) => {
+
+    fetch('https://api.spotify.com/v1/me/player/play', request).then((res) => {
         if (res.status == 204){
             console.log('Successfully playing track ' + track.name)
             callback()

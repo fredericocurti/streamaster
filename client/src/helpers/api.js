@@ -60,13 +60,13 @@ export default window.auth = {
         let res = await fetch('api/playlist/follow', req)
     },
 
-    unfollowPlaylist: async (user1, user2) => {
+    unfollowPlaylist: async (playlist, user) => {
         let req = {
             headers: { "Content-Type": "application/json" },
             method: 'DELETE',
             body: JSON.stringify({
-                user_id1: user1.user_id, // yourself
-                user_id2: user2.user_id, // other user
+                user_id: user.user_id, // yourself
+                playlist_id: playlist.playlist_id, // other user
             })
         }
         console.log(req)
@@ -168,6 +168,7 @@ export default window.auth = {
     insertSongOnPlaylist: async(song, playlist) => {
         console.log("api helper called for inserting song to playlist")
         console.log(playlist)
+        console.log('song --', song)
         let res = await fetch('api/playlist/' + playlist.playlist_id, {
             headers: { "Content-Type": "application/json" },
             method: 'PUT',

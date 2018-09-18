@@ -181,6 +181,17 @@ app.post('/api/playlist/follow', async(req,res) => {
   res.sendStatus(200)
 })
 
+// Unfollow playlist
+app.delete('/api/playlist/follow', async (req, res) => {
+  let { user_id, playlist_id } = req.body
+  console.log(user_id, playlist_id)
+  let query = await querySql(
+    "DELETE FROM User_follows_playlist WHERE playlist_id=? AND user_id=?",
+    [playlist_id, user_id]
+  )
+  res.sendStatus(200)
+})
+
 //Get user Playlists
 app.get('/api/user/:id/playlist', async(req, res) => {
   let user = req.params.id
@@ -249,7 +260,7 @@ app.put('/api/playlist/:id', async (req, res) => {
   let song = req.body
   let track_id
   let q = con.query(`CALL InsertTrackToPlaylist(?, ?, ?, ?, ?, ?, ?)`,
-    [song.source, song.title, song.artist, song.thumbnail_url, song.url, song.duration, playlist_id],
+    [song.source, song.title, song.artist, song.thumbnail_url, song.url, song.duration_ms, playlist_id],
     (err, result) => {
       result = result.map((e) => Object.assign({}, e))
       console.log(result[0]['0'].hash)
@@ -283,7 +294,7 @@ app.post('/api/user/inbox', async (req, res) => {
   console.log("SENDING INBOX")
   let {origin_user_id, destination_user_id, song} = req.body
   let q = con.query("CALL checkTrackInbox (?, ?, ?, ?, ?, ?)",
-    [song.source, song. title, song.artist, song.thumbnail_url, song.url, song.duration],
+    [song.source, song. title, song.artist, song.thumbnail_url, song.url, song.duration_ms],
     (err, result) => {
       let track_id = result[0]['0'].hash
       con.query("INSERT INTO Inbox (origin_user_id, destination_user_id, playlist_id, track_id) VALUES (?, ?, ?, ?)", [origin_user_id, destination_user_id, null, track_id],

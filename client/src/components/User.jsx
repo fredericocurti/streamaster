@@ -59,13 +59,17 @@ class User extends Component {
   }
 
   render() {
-    let {user} = this.props
+    let {user, isStatic} = this.props
     let {isClicked} = this.state
+    let isFollowing = this.props.following.indexOf(user) >= 0 ? true : false
 // col m2 l2 s6
     return (
-      <span className={`user-container ${isClicked ? 'expanded' : 'default'}`} onClick={() => {
-        this.onClick()
-      }}>
+      <span
+        className={`user-container ${isClicked ? 'expanded' : 'default'} ${isStatic ? 'static' : null}`} 
+        onClick={() => {
+          this.onClick()
+        }}
+      >
         <div className='user-info-small'>
             <span className='user-badge'>
               <img
@@ -84,11 +88,12 @@ class User extends Component {
             </span>
           {isClicked
             ? <FlatButton
-              label={"Follow"}
+              label={isFollowing ? "Following" : "Follow"}
               secondary={true}
               style={{marginTop: 30}}
               icon={<FontIcon className="material-icons">visibility</FontIcon>}
               onClick={this.onFollowClick}
+              style={{color: isFollowing ? 'lightgreen' : 'purple', marginTop: 20}}
             />
             : null
           }
@@ -105,10 +110,24 @@ class User extends Component {
                 icon={<FontIcon className="material-icons" />}
               />
             </div>
-            {this.state.playlists.map((p) => <div onClick={(e) => {
-              e.stopPropagation()
-              this.onPlaylistClick(p)
-            }} className='playlist-user-item'> {p.name} </div>)}
+            {this.state.playlists.map((p) => {
+              let isFollowed = this.props.playlists.filter((el) => {
+                return el.playlist_id === p.playlist_id ? true : false
+              })
+              isFollowed = isFollowed.length !== 0 ? true : false
+          
+              return (<div
+                onClick={(e) => {
+                  e.stopPropagation()
+                  this.onPlaylistClick(p)
+                }}
+                className='playlist-user-item'
+              >
+                {p.name} {isFollowed ? '✔️' : ''}
+              </div>)
+            })
+              
+            }
         </div>
         : null
         }
