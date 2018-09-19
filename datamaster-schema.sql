@@ -34,7 +34,7 @@ CREATE TABLE Track (
     artist VARCHAR(128),
     thumbnail_url  VARCHAR(512),
 	url VARCHAR(512) NOT NULL,
-    duration INT
+    duration_ms INT
 );
 
 CREATE TABLE Playlist_has_track (

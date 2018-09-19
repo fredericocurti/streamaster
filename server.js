@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 const con = mysql.createConnection({
   host: 'localhost',
-  user: 'fredcurti',
+  user: 'root',
   password: '1170',
   database: 'streamaster'
 })
@@ -26,7 +26,9 @@ function clean (result) {
 
 con.connect((err) => {
   if (err) throw err
-  console.log('MySQL Connected') 
+  else {
+    console.log('MySQL Connected') 
+  }
 })
 
 app.get('/oi', (req, res) => {
@@ -258,6 +260,7 @@ app.put('/api/playlist/:id', async (req, res) => {
   console.log("INSERTING NEW SONG")
   let playlist_id = req.params.id
   let song = req.body
+  console.log('--- requested to add song ---- \n', song)
   let track_id
   let q = con.query(`CALL InsertTrackToPlaylist(?, ?, ?, ?, ?, ?, ?)`,
     [song.source, song.title, song.artist, song.thumbnail_url, song.url, song.duration_ms, playlist_id],
@@ -307,7 +310,17 @@ app.post('/api/user/inbox', async (req, res) => {
 //Get user's inbox
 app.get('/api/:id/inbox', async (req, res) => {
   let user_id = req.params.id
-  let q = await querySql("SELECT * FROM Inbox WHERE destination_user_id = ?",
+  let q = await querySql(
+  `SELECT i.origin_user_id, i.destination_user_id, i.date_sent, i.playlist_id, i.track_id, t.source, t.title, t.artist, t.thumbnail_url, t.url, t.duration_ms, u.user_id, u.email, u.username 
+  FROM Inbox i
+  INNER JOIN Track t using(track_id) 
+  INNER JOIN User u ON(i.origin_user_id = u.user_id)
+  WHERE destination_user_id = ?`,
+
+//     SELECT * FROM Inbox i
+// INNER JOIN Track t using(track_id)
+// INNER JOIN User u ON(i.origin_user_id = u.user_id)
+// WHERE destination_user_id = 5;
   [user_id]
   )
   console.log("-------- INBOX --------", q)
@@ -316,10 +329,12 @@ app.get('/api/:id/inbox', async (req, res) => {
 
 //Clear user's inbox
 app.delete('/api/user/inbox', async (req, res)=> {
-  let user_id = req.body.user.user_id
+  let user_id = req.body.user_id
+  console.log('Deleting inbox for user ', user_id)
   let q = await querySql("DELETE FROM Inbox WHERE destination_user_id = ?",
-  [user_id]
-  ) 
+    [user_id]
+  )
+  res.sendStatus(200)
 })
 
 if (process.env.NODE_ENV === 'production') {

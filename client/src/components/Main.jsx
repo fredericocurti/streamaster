@@ -34,6 +34,8 @@ import api from '../helpers/api.js'
 import spotifyLogo from '../assets/spotify-logo.png'
 import PlaylistModal from './PlaylistModal';
 
+import moment from 'moment'
+
 
 // const playlists = JSON.parse(window.localStorage.getItem('playlists')) || [{
 //         name: 'sup',
@@ -268,6 +270,11 @@ class Main extends Component {
 
     handleDrawer = () => this.setState({ drawerOpen: !this.state.drawerOpen });
 
+    clearInbox = () => {
+        api.clearInbox(this.state.auth)
+        this.setState({inbox: []})
+    }
+
     onCreatePlaylist = async () => {
         let result = await api.createNewPlaylist(this.state.auth)
         console.log("onCreatePlaylist results: ")
@@ -358,14 +365,14 @@ class Main extends Component {
         console.log('added song',song, 'to playlist', playlist, 'index', playlistIndex)
         // API CALL TO STORE
         let res = await api.insertSongOnPlaylist(song, playlist)
-        console.log(res.track_id)
+        // console.log(res.track_id)
         let p = [...this.state.playlists]
-        p[playlistIndex].songs.push({
+        let pi = this.state.playlists.indexOf(playlist)
+        p[pi].songs.push({
             ...song,
             track_id: res.track_id
         })
         this.setState({playlists: p})
-        // })
     }
 
     onFriendClick = (friend, index) => {
@@ -390,12 +397,32 @@ class Main extends Component {
         // }, 50);
     }
 
+    onInboxTrackClicked = (message) => {
+        let media = message
+        if (media.source === 'spotify') {
+            this.setState({
+                currentSource: media.source,
+                currentTrack: media,
+                youtubePicked: false
+            })
+        } else if (media.source === 'youtube') {
+            this.onYoutubeClick(media)
+        } else if (media.source === 'soundcloud') {
+            this.onSoundcloudClick(media)
+        }
+
+        // this.setState({
+        //     playlistIndex: playlistIndex,
+        //     songIndex: songIndex
+        // })
+    }
+
     getUsernameForUserId(user_id) {
         if (this.state.following.length > 0 || this.state.followers.length > 0) {
             let f = this.state.followers.find((u) => {
                 return u.user_id === user_id ? true : false
             })
-            let f2 = this.state.followers.find((u) => {
+            let f2 = this.state.following.find((u) => {
                 return u.user_id === user_id ? true : false
             })
             // console.log(f ? f.username : null || f2 ? f2.username : null)
@@ -674,18 +701,31 @@ class Main extends Component {
                         <ReactTooltip delayHide={100} className='tooltip-class' place='bottom' id='inbox' type='light' effect='solid'>
                             <div className='hoverable-container'>
                                 <div className='friend-cat'>
-                                    Received
-                                    {/* {this.state.inbox.map((message,i) => 
-                                        <div 
-                                            key={'message'+message.user_id} 
-                                            className='friend-item' 
-                                            onClick={() => {
-                                                // this.onFriendClick(el, i)
-                                            }}
-                                        >
-                                                {message.username}
+                                    <span className='inbox-header'> 
+                                        <span>Received</span>
+                                        <a onClick={this.clearInbox}>Clear</a>
+                                    </span>
+                                    {this.state.inbox.map((message,i) => 
+                                        <div key={'message'+ message.track_id} className='message-item' onClick={() => {
+                                                this.onInboxTrackClicked(message)
+                                        }}> <span className='message-sender'> {message.username} 
+                                                { '  -  ' + moment(message.date_sent).fromNow() }
+                                        </span>
+                                            <img className='message-thumb' src={message.thumbnail_url}/>
+                                            <span className='message-title'> {message.title} 
+                                                <span className='message-artist'>
+                                                    {'  -  ' + message.artist}
+                                                    <span className='rotating-ball message' style={{
+                                                        color:
+                                                            message.source === 'spotify' ? 'lightgreen' : null
+                                                                || message.source === 'soundcloud' ? 'orange' : null
+                                                                    || message.source === 'youtube' ? 'red' : null
+                                                    }}> ● </span>
+                                                </span>
+                                            </span>
+                                            
                                         </div>
-                                    )} */}
+                                    )}
                                 </div>
                             </div>
                         </ReactTooltip>
@@ -765,7 +805,7 @@ class Main extends Component {
                         </div>
                         <div className='row users-container'>
                             {this.state.userResults.length > 0 // Alterei nesta linha para map com this.state.users
-                                ? this.state.userResults.map((user, index) => {
+                                ? this.state.userResults.filter((el) => el.user_id !== this.state.auth.user_id).map((user, index) => {
                                     return <User key={user.user_id} onPlaylistClick={this.onPlaylistClick} onFollowClick={this.onFollowClick} i={index} onClick={this.onUserClick} user={user} {...this.state} ></User>
                                 })
                                 : null

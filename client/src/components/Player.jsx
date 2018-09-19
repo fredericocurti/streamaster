@@ -165,7 +165,7 @@ class Player extends Component{
       } else if (this.props.info.currentSource === 'youtube') {
         return parseInt(this.youtubePlayer().getDuration())
       } else if (this.props.info.currentSource === 'soundcloud') {
-        return parseInt(this.props.info.currentSoundcloudTrack.duration_ms/1000 || this.props.info.currentSoundcloudTrack.duration / 1000)
+        return parseInt(this.props.info.currentSoundcloudTrack.duration_ms / 1000 || this.props.info.currentSoundcloudTrack.duration / 1000)
       }
     }
  

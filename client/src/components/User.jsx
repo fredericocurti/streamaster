@@ -61,7 +61,7 @@ class User extends Component {
   render() {
     let {user, isStatic} = this.props
     let {isClicked} = this.state
-    let isFollowing = this.props.following.indexOf(user) >= 0 ? true : false
+    let isFollowing = this.props.following.filter((u) => u.user_id === user.user_id ).length > 0 ? true : false 
 // col m2 l2 s6
     return (
       <span
@@ -110,7 +110,7 @@ class User extends Component {
                 icon={<FontIcon className="material-icons" />}
               />
             </div>
-            {this.state.playlists.map((p) => {
+            {this.state.playlists.filter((e) => e.user_id === this.props.user.user_id ? true : false).map((p) => {
               let isFollowed = this.props.playlists.filter((el) => {
                 return el.playlist_id === p.playlist_id ? true : false
               })
@@ -119,7 +119,7 @@ class User extends Component {
               return (<div
                 onClick={(e) => {
                   e.stopPropagation()
-                  this.onPlaylistClick(p)
+                  isFollowing ? this.onPlaylistClick(p) : void(0)
                 }}
                 className='playlist-user-item'
               >
