@@ -9,7 +9,7 @@ const baseUrl = '/api/'
 export default window.auth = {
     getUserFollow: async(user) => {
         console.log("API helper called for getting follow")
-        let res = await fetch('api/' + user.user_id + '/friend', {
+        let res = await fetch('api/user/' + user.user_id + '/friend', {
             headers: { "Content-Type": "application/json" },
             method: 'GET',
         })
