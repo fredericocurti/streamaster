@@ -1,0 +1,24 @@
+{
+  "name": "streamaster",
+  "version": "1.0.0",
+  "description": "streamaster backend service",
+  "main": "server.js",
+  "repository": "https://github.com/fredericocurti/Project-Streamaster",
+  "author": "vilela69 <frederico.vilelacurti@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "global": "^4.3.2",
+    "mysql": "^2.16.0",
+    "nodemon": "^1.18.4"
+  },
+  "devDependencies": {
+    "eslint": "^5.6.0",
+    "eslint-config-standard": "^12.0.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-node": "^7.0.1",
+    "eslint-plugin-promise": "^4.0.1",
+    "eslint-plugin-standard": "^4.0.0"
+  }
+}
