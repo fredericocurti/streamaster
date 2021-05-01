@@ -69,18 +69,20 @@ class Login extends Component {
     }
   }
 
-  onFileChange = () => {
-    let file = this.fileInput.files[0]
-    let reader  = new FileReader();
-    console.log(file)
+  onFileChange = async (ev) => {
+    const file = Array.from(ev.target.files).pop()
+    const formData = new FormData()    
+    formData.append("source", file)
+    formData.append("type", "file")
+    formData.append("action", "upload")
 
-    reader.addEventListener("load",  () => {
-      this.setState({ imageBlob : reader.result, imageFile : file })
-    }, false);
-  
-    if (file) {
-      reader.readAsDataURL(file);
-    }
+    const res = await fetch("https://imgbb.com/json", {
+        method: "POST",
+        body: formData
+    })
+
+    const json = await res.json()
+    this.setState({ imageBlob: json.image.display_url })    
   }
 
     render() {

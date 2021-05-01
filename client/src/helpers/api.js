@@ -103,6 +103,17 @@ export default window.auth = {
         console.log(data)
         return data
     },
+    
+    setUserImage: async(uid, imageUrl) => {
+        let res = await fetch(`api/user/${uid}`, {
+            headers: { "Content-Type": "application/json" },
+            method: 'PUT',
+            body: JSON.stringify({ image: imageUrl })
+        })
+        let data = await res.json()
+        console.log(data)
+        return data
+    },
 
 //PLAYLISTS
     getUserPlaylists: async(user) => {

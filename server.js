@@ -15,10 +15,10 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use('/', express.static('./client/build'))
 
 const con = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '1170',
-  database: 'streamaster'
+  host: 'wcwimj6zu5aaddlj.cbetxkdyhwsb.us-east-1.rds.amazonaws.com',
+  user: 'zsclmpmmxya8b90y',
+  password: 'j47ewt534qqh8mlr',
+  database: 'y9c1jia83xptgrv3'
 })
 
 function clean (result) {
@@ -40,9 +40,6 @@ const querySql = (queryString, params = null) => {
   return new Promise((resolve, reject) => {
     con.query(queryString, params, (err, result) => {
       if (err) reject(err)
-      // console.log('--- result ---')
-      // console.log(result)
-      // console.log(' --------- ')
       if (result) {
         result = clean(result)
       }
@@ -69,61 +66,43 @@ app.post('/api/login', (req, res) => {
 
 // REGISTER
 app.post('/api/user', (req, res) => {
-  console.log(req.body)
-  const { email, username, password, file } = req.body
-  print(email, username, password, null)
+  const { email, username, password, image } = req.body
+  print(email, username, password, image)
   con.query('SELECT * FROM User WHERE email=? OR username=?', [email, username], (err, result) => {
     if (err) throw err
     if (result == 1) {
       res.json({ status: 404 })
     } else {
-      con.query('INSERT INTO User (email, username, password, thumbnail_url) VALUES (?,?,?,?)', [email, username, password, null], (err, result) => {
-        res.json({ user_id: result.insertId, email: email, username: username, status: 200 })
+      con.query('INSERT INTO User (email, username, password, thumbnail_url) VALUES (?,?,?,?)', [email, username, password, image], (err, result) => {
+        res.json({ user_id: result.insertId, email: email, username: username, thumbnail_url: image, status: 200 })
       })
     }
   })
 })
 
-// Search User
-app.get('/api/user/:info', (req, res) => {
-  console.log(req.params.info)
-  let info = req.params.info
-  
-  //SELECT * FROM User WHERE username LIKE '%rapha%' OR email LIKE '%rapha%';
-  //let sql = "SELECT user_id, email, username, thumbnail_url FROM User WHERE email LIKE '%"+info+"%'" + "OR username LIKE '%"+info+"%'" 
-  let query = con.query('SELECT user_id, email, username, thumbnail_url FROM User WHERE email LIKE ?', ["'%" + info + "%'"], (err, result) => {
-    console.log(query.sql)
-    console.log('Result: ')
-    console.log(result)
-  })
+app.put('/api/user/:id', async (req, res) => {
+  let id = req.params.id
+  const { image } = req.body
+  const result = await querySql("UPDATE User SET thumbnail_url=? WHERE user_id=?", [image, id])
+  res.json(result)
 })
 
 // Search user by get params
 app.get('/api/user', async(req, res) => {
-  console.log('REQUEST:' + req.originalUrl)
   let query = req.query.q
   let users = []
-  // console.log(query)
   let result = await querySql(
     'SELECT user_id, email, username, thumbnail_url FROM User WHERE username LIKE ? OR email LIKE ?',
     [`%${query}%`, `%${query}%`]
-  )
-  console.log(result)
+  )  
   res.json(result)
-  // con.query('SELECT user_id, email, username, thumbnail_url FROM User WHERE username LIKE ? OR email LIKE ?', [`%${query}%`, `%${query}%`], (err, result) => {
-    // result = result.map((e) => Object.assign({}, e))
-    // res.json(result) 
-  // })
-  //con.query('SELECT playlist_id, name FROM Playlist WHERE user_id = ')
 })
 
 // Create New Playlist
 app.post('/api/playlist', (req, res) => {
-  console.log('Saving new playlist')
   let user_id = req.body.user_id
-  console.log('user_id: ' + user_id)
   con.query("INSERT INTO Playlist (name, is_public, user_id) VALUES ('New Playlist', 1, ?)", [user_id], (err, result) => {
-    console.log('INSERT INTO Playlist')
+    
   })
   con.query('SELECT LAST_INSERT_ID()', (err, result) => {
     result = result.map((e) => Object.assign({}, e))
@@ -134,8 +113,6 @@ app.post('/api/playlist', (req, res) => {
 
 // Change playlist name
 app.patch('/api/playlist', (req, res) => {
-  console.log('Changing Playlist name')
-  // const {playlist_id, new_name} = req.body
   let playlist_id = req.body.playlist_id
   let new_name = req.body.new_name
   con.query('UPDATE Playlist SET name=? WHERE playlist_id=?', [new_name, playlist_id], (err, result) => {
@@ -146,33 +123,29 @@ app.patch('/api/playlist', (req, res) => {
 
 // Get followers and following users
 app.get('/api/user/:id/friend', async(req, res) => {
-  console.log('Getting current user followers and following')
   let following = []
   let followers = []
   let user_id = req.params.id
   try {
     let query1 = await querySql(
-      'SELECT user_id, username FROM User INNER JOIN Follow ON User.user_id = Follow.user_id2 WHERE Follow.user_id1 = ?',
+      'SELECT user_id, username, thumbnail_url FROM User INNER JOIN Follow ON User.user_id = Follow.user_id2 WHERE Follow.user_id1 = ?',
       [user_id]
     )
 
     if (query1.length === 0) {
-      console.log('No following users')
     } else {
       following = query1
     }
 
     let query2 = await querySql(
-      'SELECT user_id, username FROM User INNER JOIN Follow ON User.user_id = Follow.user_id1 WHERE Follow.user_id2 = ?',
+      'SELECT user_id, username, thumbnail_url FROM User INNER JOIN Follow ON User.user_id = Follow.user_id1 WHERE Follow.user_id2 = ?',
       [user_id]
     )
 
     if (query2.length === 0) {
-      console.log('No followers')
     } else {
       followers = query2
     }  
-    console.log(query1, query2)
     res.json({ following: following, followers: followers })
 
   } catch (error) {
@@ -183,7 +156,6 @@ app.get('/api/user/:id/friend', async(req, res) => {
 // Follow playlist
 app.post('/api/playlist/follow', async(req,res) => {
   let {user_id, playlist_id} = req.body
-  console.log(user_id, playlist_id)
   try {
     let query = await querySql("INSERT INTO User_follows_playlist VALUES(?, ?)",
       [playlist_id, user_id]
@@ -197,7 +169,6 @@ app.post('/api/playlist/follow', async(req,res) => {
 // Unfollow playlist
 app.delete('/api/playlist/follow', async (req, res) => {
   let { user_id, playlist_id } = req.body
-  console.log(user_id, playlist_id)
   try {
     let query = await querySql(
       "DELETE FROM User_follows_playlist WHERE playlist_id=? AND user_id=?",
@@ -229,7 +200,6 @@ app.get('/api/user/:id/playlist', async(req, res) => {
       // WHERE user_id=1;
       [user, user]
     )
-    console.log('QUERY', query)
     let result
 
     // let response = []
@@ -246,8 +216,6 @@ app.get('/api/user/:id/playlist', async(req, res) => {
     })
 
     let lastReponse = await Promise.all(response)
-    // console.log(show)
-    // console.log('-- RESP -- \n', lastReponse)
     res.json(lastReponse)  
   } catch (error) {
     res.sendStatus(404)
@@ -256,8 +224,7 @@ app.get('/api/user/:id/playlist', async(req, res) => {
 
 //Delete Playlist
 app.delete('/api/playlist/:id', async (req, res) => {
-  let id = req.params.id
-  console.log('deleting playlist', id)
+  let id = req.params.id  
   try {
     let query = await querySql(
       "DELETE FROM Playlist WHERE playlist_id = ?",
@@ -265,7 +232,6 @@ app.delete('/api/playlist/:id', async (req, res) => {
     )
     res.sendStatus(200)
   } catch (error) {
-    console.log(error)
     res.sendStatus(404)
   }
 })
@@ -274,7 +240,6 @@ app.delete('/api/playlist/:id', async (req, res) => {
 app.delete('/api/playlist/:playlist_id/:track_id', async (req, res) => {
   let playlistId = req.params.playlist_id
   let trackId = req.params.track_id
-  console.log('---- deleting song ------ \n', playlistId, trackId)
   try {
     let query = await querySql("DELETE FROM Playlist_has_track WHERE track_id = ? AND playlist_id = ?",
       [trackId, playlistId]
@@ -287,10 +252,8 @@ app.delete('/api/playlist/:playlist_id/:track_id', async (req, res) => {
 
 //Insert new song to playlist
 app.put('/api/playlist/:id', async (req, res) => {
-  console.log("INSERTING NEW SONG")
   let playlist_id = req.params.id
   let song = req.body
-  console.log('--- requested to add song ---- \n', song)
   let track_id
   let q = con.query(`CALL InsertTrackToPlaylist(?, ?, ?, ?, ?, ?, ?)`,
     [song.source, song.title, song.artist, song.thumbnail_url, song.url, song.duration_ms, playlist_id],
@@ -299,7 +262,6 @@ app.put('/api/playlist/:id', async (req, res) => {
         res.sendStatus(404)
       }
       result = result.map((e) => Object.assign({}, e))
-      console.log(result[0]['0'].hash)
       res.json({track_id: result[0]['0'].hash})
     }
   )
@@ -307,8 +269,6 @@ app.put('/api/playlist/:id', async (req, res) => {
 
 //Follow user
 app.post('/api/user/friend', async (req, res) => {
-  console.log("Follow user request")
-  console.log(req.body)
   let {user_id1, user_id2} = req.body
   try {
     let q = await querySql('INSERT INTO Follow (user_id1, user_id2) VALUES (?, ?)',
@@ -335,7 +295,6 @@ app.delete('/api/user/friend', async (req, res) => {
 
 //Send Inbox
 app.post('/api/user/inbox', async (req, res) => {
-  console.log("SENDING INBOX")
   let {origin_user_id, destination_user_id, song} = req.body
   let q = con.query("CALL checkTrackInbox (?, ?, ?, ?, ?, ?)",
     [song.source, song. title, song.artist, song.thumbnail_url, song.url, song.duration_ms],
@@ -346,7 +305,6 @@ app.post('/api/user/inbox', async (req, res) => {
       let track_id = result[0]['0'].hash
       con.query("INSERT INTO Inbox (origin_user_id, destination_user_id, playlist_id, track_id) VALUES (?, ?, ?, ?)", [origin_user_id, destination_user_id, null, track_id],
       (err, result) => {
-        console.log("Inbox Sent")
         if(err){
           res.sendStatus(404)
         } else {
@@ -366,14 +324,8 @@ app.get('/api/:id/inbox', async (req, res) => {
   INNER JOIN Track t using(track_id) 
   INNER JOIN User u ON(i.origin_user_id = u.user_id)
   WHERE destination_user_id = ?`,
-
-      //     SELECT * FROM Inbox i
-      // INNER JOIN Track t using(track_id)
-      // INNER JOIN User u ON(i.origin_user_id = u.user_id)
-      // WHERE destination_user_id = 5;
       [user_id]
     )
-    // console.log("-------- INBOX --------", q)
     res.json(q)  
   } catch (error) {
     res.sendStatus(404)
@@ -383,7 +335,6 @@ app.get('/api/:id/inbox', async (req, res) => {
 //Clear user's inbox
 app.delete('/api/user/inbox', async (req, res)=> {
   let user_id = req.body.user_id
-  console.log('Deleting inbox for user ', user_id)
   try {
     let q = await querySql("DELETE FROM Inbox WHERE destination_user_id = ?",
       [user_id]

@@ -67,13 +67,11 @@ CREATE TABLE User_follows_playlist (
 
 
 DELIMITER //
-
-DROP PROCEDURE IF EXISTS InsertTrackToPlaylist;
-
 CREATE PROCEDURE InsertTrackToPlaylist (source VARCHAR(256), title VARCHAR(256), artist VARCHAR(128), thumbnail_url VARCHAR(512), url VARCHAR(512), duration INT(11), playlist_id INT(11))
 BEGIN
 
-    DECLARE has_track, hash CHAR(32);
+    DECLARE has_track CHAR(32);
+   	DECLARE hash CHAR(32);
 
 	SET hash = md5(CONCAT(source, url));
 
@@ -87,17 +85,14 @@ BEGIN
 	END IF;
     
     SELECT hash;
-END
-//
+END//
 
 DELIMITER //
-
-DROP PROCEDURE IF EXISTS checkTrackInbox;
-
 CREATE PROCEDURE checkTrackInbox (source VARCHAR(256), title VARCHAR(256), artist VARCHAR(128), thumbnail_url VARCHAR(512), url VARCHAR(512), duration INT(11))
 BEGIN
 
-    DECLARE has_track, hash CHAR(32);
+    DECLARE has_track CHAR(32);
+   	DECLARE hash CHAR(32);
 
 	SET hash = md5(CONCAT(source, url));
 
@@ -108,6 +103,5 @@ BEGIN
 	END IF;
     
     SELECT hash;
-END
-//
+END//
 

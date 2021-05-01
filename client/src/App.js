@@ -38,10 +38,10 @@ class App extends Component {
     return (
       <Router>
       <MuiThemeProvider muiTheme={muiTheme}>
-        <div>
+        <div style={{marginBottom: 100}}>
             <Route exact path='/' component={Main}/>
             <Route path='/callback' component={SpotifyAuth}/>
-        </div>
+        </div>        
       </MuiThemeProvider>
     </Router>
     )

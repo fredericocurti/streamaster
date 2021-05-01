@@ -53,7 +53,9 @@ class Player extends Component{
     componentWillReceiveProps(nextProps){
       if (this.props.info.currentSource != nextProps.info.currentSource) {
         console.log('[Player] Switched source to ' + nextProps.info.currentSource)
-        this.setState({ slider : 0, playing : false })
+        this.setState({ slider : 0, playing : false, volume: new Number(this.state.volume).valueOf() }, () => {
+          this.changeVolume()
+        })
 
         if (nextProps.info.currentSource === 'youtube') {
           this.setState({ slider : 0.0, playing : true })                    
@@ -155,8 +157,7 @@ class Player extends Component{
         spotify.setVolume(this.state.volume * 100)
       } else if (this.props.info.currentSource === 'youtube'){
         this.youtubePlayer().setVolume(parseInt(this.state.volume * 100))
-      }
-    
+      }    
     }
 
     getSliderMax = () => {
@@ -174,11 +175,13 @@ class Player extends Component{
       const playIcon =  <FontIcon className="material-icons">pause</FontIcon>
       const timeIcon = <FontIcon className="material-icons">schedule</FontIcon>
 
-
       const getArtistsNames = () => {
         let names = ''
         let i = 0
         if (this.props.info.currentSource === 'spotify') {
+          if (this.props.info.currentTrack.artist) {
+            return this.props.info.currentTrack.artist
+          }
           for (i ; i < this.props.info.currentTrack.artists.length ; i ++){
             if ( i < this.props.info.currentTrack.artists.length - 1 ){
                 names += this.props.info.currentTrack.artists[i].name + ', '
@@ -201,33 +204,29 @@ class Player extends Component{
       }
 
       const getMaxTime = () => {
+        let mt = ""
         if (this.props.info.currentSource === 'spotify'){
-          let mt = moment.utc(this.props.info.currentTrack.duration_ms).format('mm:ss')
-          return mt
+          mt = moment.utc(this.props.info.currentTrack.duration_ms).format('mm:ss')          
         } else if ( this.props.info.currentSource === 'youtube'){
-          let mt = moment.utc(this.youtubePlayer().getDuration() * 1000).format('mm:ss')
-          return mt
+          mt = moment.utc(this.youtubePlayer().getDuration() * 1000).format('mm:ss')          
         } else if ( this.props.info.currentSource === 'soundcloud'){
           let dur = this.scPlayer ? this.scPlayer.getDuration() : 0
-          let mt = moment.utc(dur * 1000).format('mm:ss')
-          return mt
+          mt = moment.utc(dur * 1000).format('mm:ss')          
         }
+        return mt
       }
 
       const getCurrentTime = () => {
+        let ct = "" 
         if (this.props.info.currentSource === 'spotify'){
-          let ct = moment.utc(this.state.slider * 1000).format('mm:ss')
-          return ct              
+          ct = moment.utc(this.state.slider * 1000).format('mm:ss')          
         } else if ( this.props.info.currentSource === 'youtube'){
-          let ct = moment.utc(this.youtubePlayer().getCurrentTime() * 1000).format('mm:ss')
-          return ct              
+          ct = moment.utc(this.youtubePlayer().getCurrentTime() * 1000).format('mm:ss')          
         } else if (this.props.info.currentSource === 'soundcloud'){
-          let ct = moment.utc(this.state.slider * 1000).format('mm:ss')
-          return ct              
+          ct = moment.utc(this.state.slider * 1000).format('mm:ss')          
         }
+        return ct
       }
-
-
 
       const getThumbnail = () => {
         if (this.props.info.currentSource === 'spotify') {
@@ -241,10 +240,8 @@ class Player extends Component{
 
         return (
           <Paper zDepth={1} className='player-wrapper'>
-            <BottomNavigation className='bottom-nav' selectedIndex={this.state.selectedIndex}>
-              
-              <img className='player-thumbnail' src={getThumbnail()}/>
-              
+            <BottomNavigation className='bottom-nav' selectedIndex={this.state.selectedIndex}>              
+              <img className='player-thumbnail' src={getThumbnail()}/>              
               <BottomNavigationItem
                 label={
                   <marquee 
@@ -261,11 +258,11 @@ class Player extends Component{
                     }
                   }}
                     > ● </span>
-                    {getSongName()}
+                    {getSongName()} - {getArtistsNames()}
                   </marquee>}
                 icon={this.state.playing ? playIcon : pauseIcon}
                 onClick={this.togglePlayback}
-                style={{width: 300}}
+                style={{width: 300}}                
               />
  
               <span className='player-counter'> { getCurrentTime() } </span>
@@ -294,7 +291,7 @@ class Player extends Component{
                     style={{height: 100, paddingBottom : 20}} 
                     axis="y" 
                     value={this.state.volume}
-                    onChange={(ev,val) => { this.setState({ volume : val })}}
+                    onChange={(ev, val) => { this.setState({ volume : val })}}
                     onDragStop={this.changeVolume}
                     step={0.05}
                   />
@@ -304,16 +301,8 @@ class Player extends Component{
                   { this.state.volume !== 0 ? 'volume_up' : 'volume_off'} 
                 </FontIcon>
               </IconButton>
-              {/* 
-              <BottomNavigationItem
-                label={getCurrentTime() + ' | ' + getMaxTime()}
-                icon={this.state.playing ? timeIcon : timeIcon}
-              /> */
-              }
-
             </BottomNavigation>
-
-            {/* {this.props.info.currentSource ==== 'soundcloud' */}
+            
               <ReactPlayer
                 style={{ display: 'none' }}
                 url={
@@ -328,43 +317,26 @@ class Player extends Component{
                 ref={(ReactPlayer) => { this.scPlayer = ReactPlayer }}
                 onReady={() => {
                   console.log('ready')
-                }}
-                onStart={() => {
-                  console.log('start')
-                  // setTimeout(() => {
-                    // this.setState({ playing: true, scPlayerReady: true, scPlaying: true })
-                    // console.log('Soundcloud onStart')
-                  // }, 1500)
-                }}
-                onPlay={() => {
-                  // setTimeout(() => {
-                    // this.setState({ playing: true, scPlayerReady: true, scPlaying: true })
-                    // console.log('Soundcloud onPlay')
-                  // }, 1500)
+                  if (this.scPlayer) {
+                    const prevVolume = new Number(this.state.volume)                    
+                    this.setState({ volume: 0 }, () => {
+                      this.setState({ volume: prevVolume.valueOf() })
+                    })
+                  }
                 }}
                 onEnded={() => {
-                  // this.setState({ playing: false, scPlaying: false, slider: 0.0 })
                   console.log('Soundcloud stopped playing - ended')
                   this.props.onTrackFinish()
                 }}
                 onPause={() => {
-                  if(this.state.playing){
-                    console.log('pauso mas devia ta tocando!')
+                  if(this.state.playing){                    
                     try {
                       document.getElementsByClassName("visualAudible__artworkOverlay g-transition-opacity")[0].click()                      
                     } catch (error) {
                     }
-                    console.log(this.scPlayer)
-                    // this.setState({ })
-                    // setTimeout(() => {
-
-                    // }, 500)
                   }
                 }}
-              />
-              
-            
-
+              />                        
           </Paper>
         );
       }

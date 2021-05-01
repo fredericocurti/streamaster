@@ -46,6 +46,12 @@ class SoundcloudTrack extends Component {
                 style={{opacity : this.state.thumbnailReady ? 1 : 0}}
                 onMouseOver={this.onMouseOver}
                 onMouseLeave={this.onMouseLeave}
+                draggable
+                onDragStart={(ev) => {
+                    ev.dataTransfer.setData("track", JSON.stringify(this.props.track));
+                    ev.dataTransfer.setData("source", "soundcloud");
+                    ev.dataTransfer.effectAllowed = "move";
+                }}
             >
                 {this.state.showMenu
                     ? <div

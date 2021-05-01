@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Card, CardActions, CardHeader, CardMedia, CardTitle, CardText } from 'material-ui/Card';
 import FlatButton from 'material-ui/FlatButton';
 import FontIcon from 'material-ui/FontIcon'
-import placeholder from '../assets/thumb-placeholder.png'
 import api from '../helpers/api';
 
 class User extends Component {
@@ -61,8 +60,9 @@ class User extends Component {
   render() {
     let {user, isStatic} = this.props
     let {isClicked} = this.state
-    let isFollowing = this.props.following.filter((u) => u.user_id === user.user_id ).length > 0 ? true : false 
-// col m2 l2 s6
+    let isFollowing = this.props.following.filter((u) => u.user_id === user.user_id ).length > 0 ? true : false
+    const filteredPlaylists = this.state.playlists.filter((e) => e.user_id === this.props.user.user_id ? true : false)
+
     return (
       <span
         className={`user-container ${isClicked ? 'expanded' : 'default'} ${isStatic ? 'static' : null}`} 
@@ -73,7 +73,7 @@ class User extends Component {
         <div className='user-info-small'>
             <span className='user-badge'>
               <img
-                src={placeholder}
+                src={user.thumbnail_url}
                 className='user-thumbnail'
                 width={64}
                 height={64}
@@ -104,18 +104,13 @@ class User extends Component {
         {this.state.isClicked 
           ? <div className='user-playlists-container'>
             <div>
-              <FlatButton
-                label={"Playlists"}
-                secondary={true}
-                icon={<FontIcon className="material-icons" />}
-              />
+            <h6 style={{fontWeight: "bold"}}>Playlists</h6>
             </div>
-            {this.state.playlists.filter((e) => e.user_id === this.props.user.user_id ? true : false).map((p) => {
+            {filteredPlaylists.map((p) => {
               let isFollowed = this.props.playlists.filter((el) => {
                 return el.playlist_id === p.playlist_id ? true : false
               })
-              isFollowed = isFollowed.length !== 0 ? true : false
-          
+              isFollowed = isFollowed.length !== 0 ? true : false          
               return (<div
                 onClick={(e) => {
                   e.stopPropagation()
@@ -123,11 +118,11 @@ class User extends Component {
                 }}
                 className='playlist-user-item'
               >
-                {p.name} {isFollowed ? '✔️' : ''}
+                <b style={{color: "lightgreen"}}>{isFollowed ? 'following' : ''}</b> {p.name} 
               </div>)
-            })
-              
+            })              
             }
+            {filteredPlaylists.length === 0 && <span> This user doesn't have any playlists </span>}
         </div>
         : null
         }

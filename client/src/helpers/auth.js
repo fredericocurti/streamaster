@@ -9,10 +9,11 @@ const baseUrl = '/api/'
 var user = {
     email : null,
     userName : null,
-    image : null
+    thumbnail_url : null,
+    user_id: null
 }
 
-export default window.auth = {
+export default window.authentication = {
     login : async (email, password) => {
         console.log('Logging in with', email, password)
         // var fd = new FormData();
@@ -79,7 +80,7 @@ export default window.auth = {
         return data
     },
 
-    register : async (email,username,password,imageBase64) => {
+    register : async (email,username,password, imageUrl) => {
         // let fd = new FormData();
         // fd.append('email',email)
         // fd.append('username',username)
@@ -94,7 +95,7 @@ export default window.auth = {
                     email: email,
                     password: password,
                     username: username,
-                    image: null
+                    image: imageUrl
                 })
             })
             let data = await res.json()

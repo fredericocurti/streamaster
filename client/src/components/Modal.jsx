@@ -3,7 +3,7 @@ import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import RaisedButton from 'material-ui/RaisedButton'
 import FontIcon from 'material-ui/FontIcon'
-import song from '../helpers/song';
+import song, { getSongInfo } from '../helpers/song';
 import PlaylistModal from './PlaylistModal';
 import api from '../helpers/api.js'
 import {capitalize} from 'lodash'
@@ -26,78 +26,11 @@ export default class Modal extends React.Component {
 
   componentWillMount() {
     let { info, modalSource } = this.props 
-
-    if (modalSource === 'spotify') {
-      this.songInfo = {
-        track_id: null,
-        source: modalSource,
-        url: info.uri,
-        title: capitalize(info.name),
-        artist: capitalize(this.getSpotifyArtistsNames(info)),
-        thumbnail_url: info.album.images[2].url,
-        thumbnail_big_url: info.album.images[1].url,
-        duration_ms: info.duration_ms
-      }
-    } else if (modalSource === 'youtube') {
-      
-      let names = this.getYoutubeNames(info)
-      this.songInfo = {
-        track_id: null,
-        source: modalSource,
-        url: info.id.videoId,
-        title: capitalize(names.song),
-        artist: capitalize(names.artist),
-        thumbnail_url: info.snippet.thumbnails.default.url,
-        thumbnail_big_url: info.snippet.thumbnails.high.url,
-        duration_ms: null
-      }
-    } else if (modalSource === 'soundcloud') {
-      var patt = /large/i;
-      let big_thumb = info.artwork_url.replace(patt, 'crop')
-
-      this.songInfo = {
-        track_id: null,
-        source: modalSource,
-        url: info.permalink_url,
-        title: capitalize(info.title) ,
-        artist: capitalize(info.user.username),
-        thumbnail_url: info.artwork_url,
-        thumbnail_big_url: big_thumb,
-        duration_ms: info.duration
-      }
-    }
     
     this.setState({
-      songInfo: this.songInfo
+      songInfo: getSongInfo(info, modalSource)
     })
-
   }
-
-  getYoutubeNames(info) {
-    console.log(info)
-    let title = info.snippet.title.toLowerCase()
-    let symIndex = title.indexOf('-')
-    let artist = title.slice(0, symIndex)
-    let song = title.slice(symIndex + 1, title.length)
-    if (symIndex === -1) {
-      return { artist: '', song: title }
-    }
-    return { artist: artist, song: song }
-  }
-
-  getSpotifyArtistsNames(info) {
-  let names = ''
-  let i = 0
-  for (i; i < info.artists.length; i++) {
-    if (i < info.artists.length - 1) {
-      names += info.artists[i].name + ', '
-    } else {
-      names += info.artists[i].name
-    }
-  }
-  return names 
-}
-
 
   componentWillReceiveProps(nextProps) {
     this.setState({ step: 'choice' })
