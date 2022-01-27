@@ -14,7 +14,9 @@ const puppeteer = require('puppeteer');
 let browser
 
 (async () => {
-  browser = await puppeteer.launch();
+  browser = await puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+  });
 })();
 
 app.use(bodyParser.json())
