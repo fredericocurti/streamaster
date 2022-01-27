@@ -26,8 +26,6 @@ class SoundcloudTrack extends Component {
     
     onClick = () => {
         this.props.onClick(this.props.track, 'search')
-        // window.open(this.props.track.external_urls.spotify,'_blank')
-        // console.log(this.props.track.uri)
     }
 
     onMouseOver = () => {
@@ -70,7 +68,7 @@ class SoundcloudTrack extends Component {
                     alt=""
                     onLoad={() => { this.setState({thumbnailReady : true})} }
                 />
-                <span style={{ color: this.props.isCurrent ? 'purple' : 'black', paddingLeft: 5 }}> <b>{this.props.track.title}</b> - {this.props.track.user.username} </span>
+                <span style={{ color: this.props.isCurrent ? 'purple' : 'black', paddingLeft: 5 }}> <b>{this.props.track.title}</b> - {this.props.track.username || this.props.track.user.username} </span>
             </span>
         )
     }

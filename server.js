@@ -9,6 +9,13 @@ const fs = require('fs')
 const fetch = require('node-fetch')
 const port = process.env.PORT || 5000
 const print = console.log
+const puppeteer = require('puppeteer');
+
+let browser
+
+(async () => {
+  browser = await puppeteer.launch();
+})();
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -361,6 +368,21 @@ app.get('/api/youtube', async (req, res) => {
   } catch (err) {
     return res.status(400).json(JSON.stringify(err))
   }
+})
+
+app.get('/api/soundcloud', async (req, res) => {
+  /** @type puppeteer.Page */
+  const page = await browser.newPage();
+
+  page.on('response', async (response) => {
+    if (response.url().startsWith('https://api-v2.soundcloud.com/search')) {
+      const coll = (await response.json()).collection
+      await page.close()
+      res.json(coll.filter(e => e.kind !== "user") || [])
+    }
+  });
+
+  await page.goto(`https://soundcloud.com/search?q=${req.query.q}`);
 })
 
 

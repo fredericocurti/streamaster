@@ -1,5 +1,4 @@
 import keys from './config'
-import song from './song';
 
 var spotifyConfig = {
   token: '',
