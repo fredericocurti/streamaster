@@ -24,6 +24,6 @@
     "eslint-plugin-standard": "^4.0.0"
   },
   "scripts": {
-    "build": "cd ./client && yarn run build && cd .."
+    "build": "cd ./client && yarn && yarn run build && cd .."
   }
 }
