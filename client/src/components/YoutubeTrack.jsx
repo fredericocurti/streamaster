@@ -64,15 +64,17 @@ class YoutubeTrack extends Component {
                     </div>
                     : null
                 }
-
-                <img src={this.props.info.snippet.thumbnails.default.url} 
-                    style={{
-                        verticalAlign : 'middle', width : 'auto',
-                         height : 50, maxWidth: 50
-                    }}
-                    onLoad={() => { this.setState({thumbnailReady : true})} }
-                    alt="" 
-                />
+                <span style={{ height: 50, width: 'auto', maxWidth: 50, overflow: 'hidden'}}>
+                  <img src={this.props.info.snippet.thumbnails.default.url} 
+                      style={{
+                          verticalAlign : 'middle', width : 'auto',
+                          height : 50, maxWidth: 50, objectFit: 'cover'
+                      }}
+                      onLoad={() => { this.setState({thumbnailReady : true})} }
+                      alt="" 
+                  />
+                </span>
+                
                 <span style={{ color: this.props.isCurrent ? 'purple' : 'black', paddingLeft: 5 }}> <b>{info.song}</b> - {info.artist}</span>
             </span>
         )

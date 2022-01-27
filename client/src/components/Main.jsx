@@ -111,7 +111,7 @@ class Main extends Component {
     this.setState({ youtubePlayer: this.youtubePlayer });
   }
 
-  onLogin = (user) => {
+  onLogin = async (user) => {
     if (user) {
       this.setState({ auth: user, open: false });
       api.getUserFollow(user).then((res) => {
@@ -121,9 +121,13 @@ class Main extends Component {
       api.getUserPlaylists(user).then((res) => {
         this.setState({ playlists: res });
       });
-      api.getUserInbox(user).then((res) => {
-        this.setState({ inbox: res });
-      });
+
+      this.setState({ inbox: await api.getUserInbox(user)})
+      setInterval(() => {
+        api.getUserInbox(user).then((res) => {
+          this.setState({ inbox: res });
+        });
+      }, 20000)
     }
   };
 
@@ -520,8 +524,7 @@ class Main extends Component {
                   this.handleDrawer();
                 }}
               >
-                {" "}
-                ✖{" "}
+                ✖
               </span>
               Playlists
             </div>
@@ -529,8 +532,7 @@ class Main extends Component {
               className="add-playlist-btn"
               onClick={this.onCreatePlaylist}
             >
-              {" "}
-              Create playlist +{" "}
+              Create playlist +
             </FlatButton>
             {this.state.playlists.length > 0
               ? this.state.playlists.map((p, playlistIndex) => {
@@ -550,7 +552,6 @@ class Main extends Component {
                           data,
                           ev.dataTransfer.getData("source")
                         );
-                        console.log(data, songInfo);
                         if (!isMine) return;
                         this.onSongAddedToPlaylist(songInfo, p, playlistIndex);
                       }}
@@ -761,6 +762,7 @@ class Main extends Component {
               data-for="inbox"
               style={{ background: "white", borderRadius: 50, marginRight: 15 }}
             >
+              {this.state.inbox.length && <span className="inbox-badge">{this.state.inbox.length}</span>}
               <FontIcon className="material-icons"> inbox </FontIcon>
             </IconButton>
             <IconButton

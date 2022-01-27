@@ -5,25 +5,23 @@ const path = require('path')
 const app = express()
 const mysql = require('mysql')
 const bodyParser = require('body-parser')
-const fs = require('fs')
 const fetch = require('node-fetch')
 const port = process.env.PORT || 5000
-const print = console.log
 const puppeteer = require('puppeteer');
-
-let browser
-
-(async () => {
-  browser = await puppeteer.launch({
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
-  });
-})();
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use('/', express.static('./client/build'))
 
 const con = mysql.createConnection(process.env.JAWSDB_URL)
+
+let browser = null;
+
+(async() => {
+  browser = await puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--single-process"]
+  });
+})()
 
 function clean(result) {
   return JSON.parse(JSON.stringify(result))
@@ -32,12 +30,8 @@ function clean(result) {
 con.connect((err) => {
   if (err) throw err
   else {
-    console.log('MySQL Connected')
+    console.log('db connected')
   }
-})
-
-app.get('/oi', (req, res) => {
-  res.send('sup')
 })
 
 const querySql = (queryString, params = null) => {
@@ -55,22 +49,23 @@ const querySql = (queryString, params = null) => {
 // LOGIN
 app.post('/api/login', (req, res) => {
   const { email, password } = req.body
-  con.query('SELECT * FROM User WHERE email=? AND password=?', [email, password], (err, result) => {
+  con.query('SELECT * FROM User WHERE email=?', [email], (err, result) => {
     if (err) throw err
     if (result < 1) {
-      res.json({ status: 404 })
-    } else {
-      // Get followings and followers
-      let user = result[0]
-      res.json({ ...user, follow: clean(result), status: 200 })
+      return res.json({ status: 404 })
     }
+    if (result[0].password !== password) {
+      return res.json({ status: 401 })
+    }
+    
+    let user = result[0]
+    return res.json({ ...user, follow: clean(result), status: 200 })
   })
 })
 
 // REGISTER
 app.post('/api/user', (req, res) => {
   const { email, username, password, image } = req.body
-  print(email, username, password, image)
   con.query('SELECT * FROM User WHERE email=? OR username=?', [email, username], (err, result) => {
     if (err) throw err
     if (result == 1) {
@@ -373,18 +368,17 @@ app.get('/api/youtube', async (req, res) => {
 })
 
 app.get('/api/soundcloud', async (req, res) => {
-  /** @type puppeteer.Page */
+  res.set('Cache-control', 'public, max-age=86400')
   const page = await browser.newPage();
-
-  page.on('response', async (response) => {
-    if (response.url().startsWith('https://api-v2.soundcloud.com/search')) {
-      const coll = (await response.json()).collection
-      await page.close()
-      res.json(coll.filter(e => e.kind !== "user") || [])
-    }
-  });
+  
+  const dataPromise = page.waitForResponse((resp) => {
+    return resp.url().startsWith('https://api-v2.soundcloud.com/search')
+  })
 
   await page.goto(`https://soundcloud.com/search?q=${req.query.q}`);
+  const data = (await (await dataPromise).json()).collection.filter(e => e.kind !== "user") || []
+  await page.close()
+  return res.json(data)
 })
 
 

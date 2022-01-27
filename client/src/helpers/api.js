@@ -205,7 +205,6 @@ export default window.auth = {
     },
 
     getUserInbox: async(user) => {
-        console.log("API helper called for getting inbox")
         let res = await fetch('api/' + user.user_id + "/inbox", {
             headers: { "Content-Type": "application/json" },
             method: 'GET',
