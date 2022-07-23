@@ -6,7 +6,7 @@ A minimalistic music streaming platform that aggregates search results from Spot
 
 ## Getting Started
 
-If you want to try it out, go to https://streamaster-95517.firebaseapp.com/
+If you want to try it out, go to https://streamaster.herokuapp.com
 
 If you wish to run it on your machine, follow the steps bellow
 ### Prerequisites
